@@ -37,6 +37,7 @@
     animate();
 
     function init(){
+        //初始化场景，相机和渲染器
         scr();
         lights();
         objects();
@@ -59,6 +60,7 @@
         // 球体
         var sphereGeometry = new THREE.SphereGeometry( 50, 32, 16 );
         var sphereMaterial = new THREE.MeshLambertMaterial( {color: 0x8888ff} );
+        //把组件和材质组合起来就是一个完整的物体
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         sphere.position.set(100, 50, -50);
         scene.add(sphere);

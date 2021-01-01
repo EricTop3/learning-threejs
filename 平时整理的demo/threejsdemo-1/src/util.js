@@ -2,6 +2,7 @@ var scene, camera, renderer, stats, container, controls, floor, textureLoader;
 var cameraRadius;
 
 function scr() {
+    //用来加载图片材质的
     textureLoader = new THREE.TextureLoader();
     // 场景
     scene = new THREE.Scene();
@@ -10,17 +11,19 @@ function scr() {
     var SCREEN_WIDTH = window.innerWidth;
     var SCREEN_HEIGHT = window.innerHeight;
     var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+    //正投影OrthographicCamera、透视投影PerspectiveCamera
     camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
     scene.add(camera);
     camera.position.set(0, 600, 1000);
     cameraRadius = Math.sqrt(camera.position.x * camera.position.x + camera.position.z * camera.position.z);
-    camera.up.set(0, 1, 0);
+    //注意up是1 也就是相机的上面开门在沿着y轴
+    camera.up.set(0, 1, 0); //默认快门是对着Y轴正方向的，也就是（0，1，0）如果把手机颠倒，up就变成了（0，-1，0），拍出来的画面也就是上下颠倒的
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     // camera.lookAt(scene.position);
 
     // 渲染器
     if (Detector.webgl)
-        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer = new THREE.WebGLRenderer({antialias: true}); //antialias 含义：是否开启反锯齿，设置为true开启反锯齿。
     else
         renderer = new THREE.CanvasRenderer();
     renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -30,14 +33,20 @@ function scr() {
 
 function addfloor() {
     // 地板
+    // 加载图片作为地板材质
     var floorTexture = textureLoader.load('images/checkerboard.jpg');
+    // 沿x方向和Y方向都重复填充
     floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+    // x方向和y方向各重复几次，不理解的话改改这个值看看效果就知道了
     floorTexture.repeat.set(2, 2);
+    // 将材质包装成表面材料，设置正反两面都要铺上
     var floorMaterial = new THREE.MeshBasicMaterial({map: floorTexture, side: THREE.DoubleSide});
     var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
+    // 把对象和材料包装成Mesh
     floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.position.y = -0.5;
     floor.rotation.x = Math.PI / 2;
+
     scene.add(floor);
 }
 
