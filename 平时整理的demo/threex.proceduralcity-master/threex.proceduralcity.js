@@ -44,7 +44,7 @@ THREEx.ProceduralCity	= function(){
 		var topColor	= baseColor.clone().multiply( light );
 		var bottomColor	= baseColor.clone().multiply( shadow );
 		// set .vertexColors for each face
-		var geometry	= buildingMesh.geometry;		
+		var geometry	= buildingMesh.geometry;
 		for ( var j = 0, jl = geometry.faces.length; j < jl; j ++ ) {
 			if ( j === 2 ) {
 				// set face.vertexColors on root face
@@ -55,6 +55,7 @@ THREEx.ProceduralCity	= function(){
 			}
 		}
 		// merge it with cityGeometry - very important for performance
+        // 合并所有建筑为单一的cityGeometry，可以有力的提升性能
 		THREE.GeometryUtils.merge( cityGeometry, buildingMesh );
 	}
 
