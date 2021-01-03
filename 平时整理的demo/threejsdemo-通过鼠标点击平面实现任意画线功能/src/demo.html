@@ -25,7 +25,9 @@
     function initScene() {
 
         scene = new THREE.Scene();
-
+        // 辅助三轴线
+        var axes = new THREE.AxesHelper(1000);
+        scene.add(axes);
     }
 
     /* 相机 */
