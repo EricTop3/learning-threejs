@@ -1,0 +1,22 @@
+.ys-dragBar-right,.ys-dragBar-bottom,.ys-dragBar-br{
+    position: absolute;
+    z-index: 9998;
+    right:0;
+    bottom: 0;
+}
+.ys-dragBar-right{
+    top:0;
+    width: 5px;
+    cursor: col-resize;
+}
+.ys-dragBar-bottom{
+    left:0;
+    height: 5px;
+    cursor: row-resize;
+}
+.ys-dragBar-br{
+    width: 10px;
+    height: 10px;
+    z-index: 9999;
+    cursor: se-resize;
+}

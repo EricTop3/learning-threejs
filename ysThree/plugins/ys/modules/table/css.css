@@ -1,0 +1,211 @@
+.ys-table{
+    width: 100%;
+    border-collapse: collapse;
+    color: #555555;
+    user-select: auto;
+}
+.ys-table.ys-table-layout{
+    table-layout: fixed;
+}
+.ys-table thead{
+    background-color:#F8F8F8;
+    user-select: none;
+}
+.ys-table td,.ys-table th{
+    padding: 10px 15px;
+    vertical-align: middle;
+    text-align: left;
+    transition: background-color 0.35s;
+}
+.ys-table th .ys-ellipsis{
+    cursor: unset;
+}
+.ys-data-table .ys-table td,.ys-data-table .ys-table th{
+    padding: 0 0;
+    vertical-align: middle;
+}
+.ys-table th.ys-table-gutter{
+    padding: 10px 0;
+    border: none!important;
+}
+.ys-table.ys-table-stripe  tbody tr:nth-child(2n){
+    background-color:#F8F8F8
+}
+.ys-table.ys-table-border td,.ys-table.ys-table-border th{
+    border: 1px solid #ebeef5;
+}
+.ys-table tr{
+    border-bottom: 1px solid #ebeef5;
+    opacity: 1;
+    transition: background-color 0.35s;
+}
+.ys-table tbody tr:hover{
+    background-color:#F5F7FA ;
+}
+.ys-data-table .ys-table tbody tr.ys-table-hover{
+    background-color:#F5F7FA ;
+}
+.ys-table.ys-border{
+    border: 1px solid #ebeef5;
+}
+/*动态表格*/
+.ys-data-table{
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 15px;
+}
+.ys-data-table-main{
+    position: relative;
+}
+.ys-data-table-pagination{
+    position: relative;
+    margin-top: 15px;
+}
+.ys-table-header{
+    overflow: hidden;
+    background-color:#F8F8F8;
+}
+.ys-table-body{
+    position: relative;
+    overflow: auto;
+    min-height: 150px;
+    top:-1px;
+    background-color: #fff;
+}
+.ys-table-cell{
+    box-sizing: border-box;
+    padding: 10px 15px;
+    word-break:break-all;
+    line-height: 20px;
+    vertical-align: middle;
+}
+.ys-table-cell.noChild-padding-left{
+    padding-left: 43px;
+}
+.ys-table-child-indent{
+    padding-left: 24px;
+}
+.ys-table-body-fixed{
+    overflow: hidden;
+    background-color: #fff;
+}
+.ys-table-fixed-left,.ys-table-fixed-right{
+    position: absolute;
+    top:0;
+    left:0;
+    background-color: #fff;
+    z-index: 22;
+    box-shadow: 4px 0 5px -3px #c9c9c9;
+    overflow: hidden;
+    bottom: 0;
+}
+.ys-table-fixed-right .ys-table-header-fixed,.ys-table-fixed-right .ys-table-body-fixed{
+    position: absolute;
+    left:auto;
+    right:-1px;
+}
+.ys-table-fixed-right{
+    box-shadow: -4px 0 5px -3px #c9c9c9;
+    right:17px;
+    left:auto;
+    z-index: 22;
+    overflow: hidden;
+}
+.ys-table-fixed-left .ys-table-header-fixed,.ys-table-fixed-left .ys-table-body-fixed{
+    position: absolute;
+    left:0;
+    right:auto;
+}
+.ys-table-header-fixed{
+    top:0
+}
+.ys-table-body-fixed{
+    bottom: 0;
+    overflow: hidden;
+}
+.ys-table-fixed-left th *,.ys-table-fixed-right th *,.ys-table-fixed-left td *,.ys-table-fixed-right td *{
+    visibility: hidden;
+}
+.ys-table-fixed-left th.ys-visible *,.ys-table-fixed-right th.ys-visible *,.ys-table-fixed-left td.ys-visible *,.ys-table-fixed-right td.ys-visible *{
+    visibility:visible;
+}
+.ys-sort{
+    display: inline-block;
+    width: 12px;
+    height:16px;
+    position: relative;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: all .35s;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+.ys-sort:hover{
+    opacity: 1;
+}
+.ys-sort-up{
+    display: inline-block;
+    position: absolute;
+    top:-2px;
+    left:0;
+    border-bottom-color: #ddd;
+}
+.ys-sort-down{
+    display: inline-block;
+    position: absolute;
+    top:7px;
+    left:0;
+    border-top-color: #ddd;
+}
+.ys-on.ys-sort-up{
+    border-bottom-color: #14AE68;
+}
+.ys-on.ys-sort-down{
+    border-top-color: #14AE68;
+}
+.ys-table .ys-checkbox-block{
+    margin-right:0;
+}
+.ys-table-loading-box{
+    opacity: 0.5;
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    z-index: 222;
+}
+.ys-table-loading-box div{
+    text-align: center;
+    width: 30px;
+    height: 30px;
+    margin:80px auto 0 auto;
+    color:#14AE68;
+    overflow: hidden;
+}
+.ys-table-sum{
+    overflow: hidden;
+    background-color: #F8F8F8;
+}
+.ys-table-sum-box{
+    overflow: hidden;
+}
+.ys-td-foldIcon,.ys-td-noChild{
+    display: inline-block;
+}
+.ys-table-sum td{
+    font-weight: bold;
+}
+.ys-td-foldIcon{
+    cursor: pointer;
+}
+tr.ys-on .ys-td-foldIcon{
+    transform: rotateZ(90deg);
+}
+.ys-td-foldIcon.ys-icon-loading-2{
+    transform: scale(0.65);
+}
+.ys-icon-none{
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+}

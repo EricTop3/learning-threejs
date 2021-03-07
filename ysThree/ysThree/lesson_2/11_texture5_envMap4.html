@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>环境贴图(4)</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="container ys-absolute-container" id="container" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">环境贴图(4)</div>
+    <div class="ys-block">
+        你可以使用球体 + 全景图进行
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+
+    const el = document.getElementById('container')
+
+    const app = new YsThree(el,{
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+
+    const camera = app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls(THREE.OrbitControls)
+    const clock = new THREE.Clock()
+    //app.initStatus(Stats)
+
+    renderer.shadowMap.enabled = true
+    renderer.setPixelRatio( window.devicePixelRatio )
+
+    //add light
+    const light = new THREE.SpotLight()
+    light.position.set(0, 30, 30)
+    light.intensity = 2
+    scene.add(light)
+    light.castShadow = true
+    /*  **** **** ****   ****/
+
+    /**
+     * 环境贴图
+     * 本例使用 立方体模拟四周， CubeTextureLoader加载六个方向图片
+     * */
+
+    const textureLoader = new THREE.TextureLoader()
+    textureLoader.load('../../images/ysThree/allScene/all.jpg',texture =>{
+        const sphere = new THREE.SphereGeometry( 25,50,50 );
+        const  material = new THREE.MeshBasicMaterial({
+            map:texture,
+            color: 0xffffff,
+            side:THREE.BackSide,
+        });
+        const mesh = new THREE.Mesh(sphere, material);
+
+        scene.add(mesh)
+    })
+
+
+    camera.position.set(0,0,0)
+
+    /*  **** **** ****   ****/
+    function render() {
+        controls.update(clock.getDelta())
+        renderer.render( scene,camera)
+        // TWEEN.update()
+        //app.staus.update()
+        requestAnimationFrame(render)
+    }
+    render()
+
+
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

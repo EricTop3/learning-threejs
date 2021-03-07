@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>飞行点</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">飞行点</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+   ysThree.init({
+       el:document.getElementById('box'),
+       cameraType:1,
+       axes:false,//坐标辅助
+       gridHelper:true,//网格参考线
+       clearColor:'#000'//画布颜色
+   },(scene,camera,renderer)=>{ //geojson
+       /**
+        * @desc 3d球面取点
+        * @param <number> radius ...
+        * @param <number> a ...
+        * @param <number> b ...
+        * @return <obj> x,y,z
+        */
+       function getPos(radius, a, b) {
+           const x = radius * Math.sin(a) * Math.cos(b);
+           const y = radius * Math.sin(a) * Math.sin(b);
+           const z = radius * Math.cos(a);
+           return { x, y, z }; // { x: x, y: y, z: z}
+       }
+
+       /**
+        * @desc 随机设置点
+        * @param <Group> group ...
+        * @param <number> radius ...
+        */
+       function setRandomDot(group, radius) {
+           const dotGeo = new THREE.SphereGeometry(10, 20, 20);
+           const dotMater = new THREE.MeshPhongMaterial({
+               color: '#0ff'
+           });
+           const dotMesh = new THREE.Mesh(dotGeo, dotMater);
+           const pos = getPos(radius, Math.PI * 2 * Math.random(), Math.PI * 2 * Math.random());
+           dotMesh.position.set(pos.x, pos.y, pos.z);
+           group.add(dotMesh)
+       }
+
+       /**
+        * @param v0 向量
+        * @param v3 向量
+        * @returns {{curve: *, lineMesh: THREE.Line}}
+        */
+       // 添加线条
+       function addLines(v0, v3) {
+           // 夹角
+           const angle = (v0.angleTo(v3) * 180) / Math.PI / 10; // 0 ~ Math.PI
+           const aLen = angle * 50, hLen = angle * angle * 120;
+           const p0 = new THREE.Vector3(0, 0, 0);
+
+           // 开始，结束点
+           // const v0 = groupDots.children[0].position;
+           // const v3 = groupDots.children[1].position;
+
+           // 法线向量
+           const rayLine = new THREE.Ray(p0, getVCenter(v0.clone(), v3.clone()));
+
+           // 顶点坐标
+           const vtop = rayLine.at(hLen / rayLine.at(1).distanceTo(p0));
+
+           // 控制点坐标
+           const v1 = getLenVcetor(v0.clone(), vtop, aLen);
+           const v2 = getLenVcetor(v3.clone(), vtop, aLen);
+
+           // 绘制贝塞尔曲线
+           const curve = new THREE.CubicBezierCurve3(v0, v1, v2, v3);
+           const geometry = new THREE.BufferGeometry()
+           geometry.setFromPoints(curve.getPoints(50))// 或者：geometry.vertices = curve.getPoints(50);
+           const material = new THREE.LineBasicMaterial({ color: "#3bccef" });
+           // Create the final obj to add to the scene
+           return {
+               curve: curve,
+               lineMesh: new THREE.Line(geometry, material)
+           };
+       }
+
+       // 计算v1,v2 的中点
+       function getVCenter(v1, v2) {
+           let v = v1.add(v2);
+           return v.divideScalar(2);
+       }
+
+       // 计算V1，V2向量固定长度的点
+       function getLenVcetor(v1, v2, len) {
+           let v1v2Len = v1.distanceTo(v2);
+           return v1.lerp(v2, len / v1v2Len);
+       }
+
+       const groupDots = new THREE.Group();
+       const groupLines = new THREE.Group();
+       const radius = 600; // 球的半径
+       const earthGeo = new THREE.SphereGeometry(radius, 100, 100);
+       const earthMater = new THREE.MeshPhongMaterial({
+           map: new THREE.TextureLoader().load('../../images/ysThree/earth.jpg'),
+           side: THREE.DoubleSide
+       });
+       const earthMesh = new THREE.Mesh(earthGeo, earthMater);
+       scene.add(earthMesh);
+
+       // 光
+       const light = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+       scene.add(light);
+
+       // 小点
+       for (let i = 0; i < 100; i++) {
+           setRandomDot(groupDots, radius);
+       }
+       scene.add(groupDots);
+
+       // 曲线
+       const animateDots = [];
+       groupDots.children.forEach(elem => {
+           const line = addLines(groupDots.children[0].position, elem.position);
+           groupLines.add(line.lineMesh);
+           animateDots.push(line.curve.getPoints(100));
+       });
+       scene.add(groupLines);
+
+       // 添加动画
+       const aGroup = new THREE.Group();
+       for (let i = 0; i < animateDots.length; i++) {
+           let aGeo = new THREE.SphereGeometry(10, 10, 10);
+           let aMater = new THREE.MeshPhongMaterial({ color: '#3bccef' });
+           let aMesh = new THREE.Mesh(aGeo, aMater);
+           aGroup.add(aMesh);
+       }
+
+       let vIndex = 0;
+       function animateLine() {
+           aGroup.children.forEach((elem, index) => {
+               let v = animateDots[index][vIndex];
+               elem.position.set(v.x, v.y, v.z);
+           });
+           vIndex++;
+           if (vIndex > 100) {
+               vIndex = 0;
+           }
+           requestAnimationFrame(animateLine);
+       }
+       scene.add(aGroup);
+       animateLine();
+
+       // 载入控制器
+       const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+       function animate() {
+           controls.update();
+           renderer.render(scene, camera);
+           requestAnimationFrame(animate);
+       }
+       camera.position.set(-1000,1000,-1000)
+       animate()
+   })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

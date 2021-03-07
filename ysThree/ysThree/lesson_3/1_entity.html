@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>几何</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="container ys-absolute-container" id="container" style="overflow: hidden;"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">几何体介绍</div>
+    <div class="ys-block">
+        <p>threejs提供很多现成的几何体，也可以自定义，前提是你会算法</p>
+        <p>three中的几何分为几何和缓存几何 ，前者用起来方便，后者大型项目大型数量来说，性能更强，很多几何底层就是对应缓存几何直接生成的</p>
+        <p>我们这里只介绍几何。</p>
+        <p>Geometry —— 所有几何模型的基类</p>
+        <p>对于二维平面，如果在它旋转的时候 能看到背面，需要设置材质THREE.DoubleSide</p>
+        <p>创建二维几何体，是不用考虑z轴的，但是你想要一个水平的二维图，必须将二维网格绕x轴旋转-0.5*PI</p>
+        <p>
+            这里我们有必要区分下：<br/>
+            Geometry(如BoxGeometry)不是对象,需要创建对象Object(如：Mesh,Points,Group)载入。)<br/>
+        </p>
+
+        <p>以下是当前Three中所有的对象，通过这些对象，构造很多</p>
+        <div class="">
+            <img src="../../images/ysThree/Three_object.png"/>
+        </div>
+        <p>
+            Bone：骨骼<br/>
+            Group:组，可以将多个对象打包成一个组，便可统一操作（移动、旋转等等）。<br/>
+            Points：点或点云，可以用点或点云表示图形<br/>
+            Line/LineSegments/LineLoop：直线、虚线、闭合线，可以用线或线团表示图形<br/>
+            Mesh：网格模型，可以用若干三角面表示图形<br/>
+            LOD：细节级别，这个挺重要的。当模型很大时，可以使用LOD技术，基于模型到相机的距离简化模型，以此来提高性能。简单的说就是，
+                 离得近的模型，顶点多一些，离得远的模型，顶点少一些<br/>
+            Skeleton：骨架，由多根骨骼组成<br/>
+            SkinnedMesh：皮肤，附着在骨骼上的图形<br/>
+            Sprite：在threejs中定义为“一个永远面向相机的平面，通常用来加载纹理”，其最重要的特点是永远面向相机，这在某些时候很有用<br/>
+        </p>
+        <br/>
+        <p>注意事项</p>
+        <p>为了提高性能，threejs默认物体的形状和材质一经创建，就永不改变。所以，修改物体的形状和材质，就需要手动告诉threejs，方法就是使用各种computeXXX方法和needsUpdate属性。</p>
+        <p>改变形状：各种computeXXX方法。改变材质：needsUpdate属性</p>
+        <p>设置透明度需要设置材质的transparent:true,才能再设置opacity </p>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/utils/SceneUtils.js"></script>
+<script>
+    function init() {
+        const container = $("#container"),
+            width = container.width(),
+            height = container.height()
+        //场景
+        const scene = new THREE.Scene();  // 场景
+
+        //相机
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        camera.position.set(0,100,150)
+        camera.lookAt(scene.position);
+
+        //渲染器
+        const renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+        renderer.setClearColor('#000');
+
+        //坐标轴辅助
+        const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+        scene.add(axes);
+
+        return {
+            scene,camera,renderer
+        }
+    }
+    const initObj = init(),
+        scene = initObj.scene ,
+        renderer = initObj.renderer,
+        camera = initObj.camera
+
+    //地面
+    const planeGeometry = new THREE.PlaneGeometry(150, 150);
+    const planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    //水平面旋转并且设置位置
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.set(0,0,0)
+    scene.add(plane);
+
+    //添加灯光
+    const pointLight = new THREE.PointLight( 0xffffff, 2, 0);
+    pointLight.position.set( 0, 70, 10 );
+    scene.add( pointLight );
+    //灯光辅助
+    const sphereSize = 1;
+    const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
+    scene.add( pointLightHelper )
+
+    //告诉渲染器，我们需要阴影映射
+    renderer.shadowMap.enabled = true;
+    //平面是接受阴影
+    plane.receiveShadow = true;
+    //需要给光源同样设置具有阴影
+    pointLight.castShadow = true;
+
+    /* 添加一个点 */
+    const addPoint = ()=>{
+        const point1 = new THREE.Vector3(1,1,0); //在Three.js中用一个向量来表示点;或者这么写：
+        const point2 = new THREE.Vector3();
+        point2.set(10,60,100);
+
+        /*点是无大小不可见的 在three中需要用对象来显示出来
+         创建一个几何模型（Geometry）,并添加点*/
+        const geometry = new THREE.Geometry(); //这是所有几何模型的基类
+        geometry.vertices.push(point1,point2); // vertices 表示顶点
+        const material = new THREE.PointsMaterial({    // 使用 PointsMaterial, 记得加上size属性，用来设置点的大小
+            color: 'red',
+            size: 4
+        })
+
+        const pointEl = new THREE.Points(geometry, material);//点云 以前叫pointCloud
+        scene.add(pointEl)
+
+        return pointEl
+    }
+    addPoint()
+
+    /* 添加一条线 线由点成*/
+    const addLine = () =>{
+        const p1 = new THREE.Vector3(1,1,0);
+        const p2 = new THREE.Vector3(10,60,100 );
+        const geometry = new THREE.Geometry();//创建一个几何
+        const material = new THREE.LineBasicMaterial( { //实线
+            //color:'red',//线色
+            vertexColors: true,//使用顶点渐变着色
+            linewidth:1 //window下无效
+        } );
+        const  material2 = new THREE.LineDashedMaterial({ //虚线  需要调用 line.computeLineDistances()
+            // vertexColors: true,
+            color: 'red',
+            dashSize: 0.6,
+            gapSize: 0.2,
+            scale: 0.3 // 比例越大，虚线越密；反之，虚线越疏
+        })
+        geometry.vertices.push(p1,p2);
+        geometry.colors.push( new THREE.Color( '#9cff1c' ), new THREE.Color( '#ff1018' ) );
+
+        const line = new THREE.Line( geometry, material2);
+        // line.computeLineDistances(); // 当为虚线时 必须调用，否则不会有虚线效果
+        scene.add(line);
+
+        return line
+    }
+    addLine()
+
+
+    /* 添加一个盒子*/
+    const addBox = ()=>{
+        const geometry = new THREE.BoxGeometry( 10, 10, 10 ); //创建一个box几何体 长宽高
+        const material = new THREE.MeshBasicMaterial( {
+            color:'red',
+            // wireframe:true //以线框形式渲染
+        } );
+        const box = new THREE.Mesh( geometry, material ); //将box几何体放入mesh中
+        box.position.set(-50,10,-30)
+        box.name ='box'
+        scene.add( box );
+        box.castShadow = true;
+        return box
+    }
+    const box = addBox()
+
+    /* 添加一个圆 */
+    const addCircle = ()=>{
+        const geometry = new THREE.CircleGeometry( 5, 32 ); // 半径 / 分割面数量(三角形) ,实际上可以通过此来创建一个正多边形 改为4就成一个平面了。
+        const material = new THREE.MeshBasicMaterial( { color: 'red',side:THREE.DoubleSide } );
+        const circle = new THREE.Mesh( geometry, material );
+        circle.position.set(-60,5,5)
+        scene.add( circle );
+
+        return circle
+    }
+
+    const circle  = addCircle()
+
+    /* 添加一个面 */
+    const addPlane = () =>{
+        const geometry = new THREE.PlaneGeometry( 5, 20 ); //宽高
+        const material = new THREE.MeshBasicMaterial( {color: 'red', side: THREE.DoubleSide} );
+        const plane = new THREE.Mesh( geometry, material );
+        plane.position.set(-60,5,25)
+        scene.add( plane )
+        return plane
+    }
+    addPlane()
+
+    /*添加 球体 */
+    function addBall() {
+        //球体
+        const sphereGeometry = new THREE.SphereGeometry(4, 20, 20)
+        const sphereMaterial = new THREE.MeshLambertMaterial({color: 'red'})
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
+        sphere.position.set( 20,4,2)
+        sphere.name ='sphere'
+        scene.add(sphere)
+        sphere.castShadow = true
+        return sphere
+    }
+    const sphere = addBall()
+    /* 创建一个椎体 */
+    const addCone = () =>{
+        const geometry = new THREE.ConeGeometry( 5, 20, 6 );//半径、高度、切割数
+        const material = new THREE.MeshBasicMaterial( {color: 'red'} );
+        const cone = new THREE.Mesh( geometry, material );
+        cone.position.set(-50,10,5)
+        cone.castShadow = true;
+        scene.add( cone );
+        return cone
+    }
+    addCone()
+
+    /* 创建一个柱体 */
+    const addCylinder = () =>{
+        const geometry = new THREE.CylinderGeometry( 5, 5, 20, 6 );
+        const material = new THREE.MeshBasicMaterial( {color: 'red'} );
+        const cylinder = new THREE.Mesh( geometry, material );
+        cylinder.position.set(-30,10,5)
+        cylinder.castShadow = true;
+        scene.add( cylinder );
+    }
+    addCylinder()
+    /* 画个圆墙*/
+    function addWall() {
+        const  geometry = new THREE.CylinderGeometry( 100, 100, 20, 64 );
+        const cylinder = new THREE.Mesh( geometry, [
+            new THREE.MeshBasicMaterial( {color: 0xffff00,side:THREE.DoubleSide} ),
+            new THREE.MeshBasicMaterial( {transparent:true,opacity:0} ),
+            new THREE.MeshBasicMaterial( {color: 'black',transparent:true,opacity:0} )
+        ]);
+        scene.add(cylinder)
+        return cylinder
+    }
+    addWall()
+    /* 单边多边形 / 面 */
+    const addPolygon = () =>{
+
+        const rectShape = new THREE.Shape();
+        rectShape.moveTo( 0,0,0);
+        rectShape.lineTo( 5, 20,0);
+        rectShape.lineTo( 30, 30,0);
+        rectShape.lineTo( 20, 5,0);
+        rectShape.lineTo( 0, 0,0);
+
+        const rectGeom = new THREE.ShapeGeometry( rectShape );
+        const rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xff0000 } ) ) ;
+
+        rectMesh.position.set(5,0,-10)
+        scene.add( rectMesh );
+    }
+    addPolygon()
+
+    /**
+     * 此外还有多面体管道体面等等 不再一一举例官网有详细实例
+     */
+
+    //渲染
+    renderer.render(scene, camera);
+    //stats
+    function initStats() {
+        const stats = new Stats()
+        stats.setMode(0); // 0: fps, 1: ms
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.left = '0px';
+        stats.domElement.style.top = '0px';
+        document.body.appendChild(stats.domElement);
+        return stats;
+    }
+    const stats = initStats()
+    //动画
+
+    let circle_number = 0.001
+    function animate() {
+        circle_number +=0.01
+        circle.rotation.y =  circle_number  * Math.PI
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+        stats.update();
+    }
+    animate()
+
+    //实际上所有几何的基类都是  Geometry(BufferGeometry) ，那么下面我们使用这个基类来创建一个立方体,而这也是自定义几何体的创建方法
+    const addOneGeometry = () =>{
+        const vertices = [
+            new THREE.Vector3(1, 3, 1),
+            new THREE.Vector3(1, 3, -1),
+            new THREE.Vector3(1, -1, 1),
+            new THREE.Vector3(1, -1, -1),
+            new THREE.Vector3(-1, 3, -1),
+            new THREE.Vector3(-1, 3, 1),
+            new THREE.Vector3(-1, -1, -1),
+            new THREE.Vector3(-1, -1, 1)
+        ];
+
+        const faces = [
+            new THREE.Face3(0, 2, 1),//三点成面 12个三角形 -- 网状体
+            new THREE.Face3(2, 3, 1),
+            new THREE.Face3(4, 6, 5),
+            new THREE.Face3(6, 7, 5),
+            new THREE.Face3(4, 5, 1),
+            new THREE.Face3(5, 0, 1),
+            new THREE.Face3(7, 6, 2),
+            new THREE.Face3(6, 3, 2),
+            new THREE.Face3(5, 7, 0),
+            new THREE.Face3(7, 2, 0),
+            new THREE.Face3(1, 3, 4),
+            new THREE.Face3(3, 6, 4),
+        ];
+
+        const geom = new THREE.Geometry();
+        geom.vertices = vertices;
+        geom.faces = faces;
+        geom.computeFaceNormals()
+
+
+        const materials = [
+            new THREE.MeshBasicMaterial({color: 'red'}),
+            new THREE.MeshBasicMaterial({color:'yellow',wireframe:true}),
+        ];
+        const mesh = new THREE.Mesh(geom, materials);
+        //给每个材质都添加阴影
+        mesh.children.forEach(function (e) {
+            e.castShadow = true
+        });
+        mesh.position.set(50,10,50)
+        mesh.castShadow = true;
+        scene.add(mesh)
+
+        return mesh
+
+    }
+    const  mesh = addOneGeometry()
+
+    function cloneOne(mesh) {
+        const clonedGeometry = mesh.geometry.clone();
+        const materials = [
+            new THREE.MeshBasicMaterial({color: 'red'}),
+            new THREE.MeshBasicMaterial({color:'yellow',wireframe:true}),
+        ];
+        const mesh2 = THREE.SceneUtils.createMultiMaterialObject(clonedGeometry, materials);
+        // new THREE.Mesh(geom, materials); 区别在于 前者可以设置多材质，后者不行，并且两者都不能向其他给定的几何体如boxGeometry一样，每个面有不同材质，如想如此，需要特殊处理
+        mesh2.children.forEach(function (e) {
+            e.castShadow = true
+        });
+
+        mesh2.position.set(50,10,20)
+        mesh2.name = "clone";
+        scene.add(mesh2);
+        // console.log(scene.getObjectByName("clone"));
+        //scene.remove(scene.getObjectByName("clone"));
+    }
+    cloneOne(mesh)
+
+
+    /**
+     * 对象坐标 转 屏幕坐标
+     */
+    function getObjectCilentCoordinates(object) {
+        if(!object) return "需要一个对象"
+        //获取网格模型boxMesh的世界坐标
+        const worldVector = new THREE.Vector3(
+            object.position.x,
+            object.position.y,
+            object.position.z
+            );
+        const standardVector = worldVector.project(camera)//世界坐标转标准设备坐标
+            ,a = renderer.getSize(new THREE.Vector2()).width/2
+            ,b = renderer.getSize(new THREE.Vector2()).height/2
+            ,x = Math.round(standardVector.x * a + a)//标准设备坐标转屏幕坐标
+            ,y = Math.round(-standardVector.y * b + b)//标准设备坐标转屏幕坐标
+        return{x,y}
+    }
+
+    const res =getObjectCilentCoordinates(box)
+    const div = document.createElement('div');
+    $(div).html('这是个盒子').css({
+        padding:'5px 10px',
+        position:'absolute',
+        backgroundColor:'rgba(255,255,255,0.8)',
+        color:'#000',
+        border:'1px solid red',
+        top:res.y-50,
+        left:res.x-50
+    })
+    document.body.appendChild(div);
+
+    /**
+     *
+     * 添加点击事件
+     * @param container
+     * @param event
+     */
+    function onMouseDblclick(container,event) {
+        const intersects = getIntersects(container,event);
+        // 获取选中最近的 Mesh 对象
+        if (intersects.length !== 0 && intersects[0].object instanceof THREE.Mesh) {
+            const obj = intersects[0].object
+            alert(obj.id+";"+obj.name)
+        } else {
+          //  alert("未选中 Mesh!");
+        }
+    }
+    $("#container").click(function (event) {
+        onMouseDblclick($("#container"),event)
+    })
+    // 获取与射线相交的对象数组
+    function getIntersects(container,event) {
+        event.preventDefault();
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        mouse.x = (event.clientX / container.width()) * 2 - 1;
+        mouse.y = -(event.clientY / container.height()) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(scene.children);
+        return intersects;
+    }
+
+    /**
+     *
+     * 滚轮缩放
+     */
+    document.getElementById("container").addEventListener('mousewheel',function (event) {
+        if(event.wheelDelta>0){
+            sphere.scale.multiplyScalar(1.02);
+        }else{
+            sphere.scale.multiplyScalar(0.98);
+        }
+    })
+
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

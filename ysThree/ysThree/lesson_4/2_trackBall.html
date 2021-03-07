@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>轨迹球</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">轨迹球</div>
+    <div class="ys-block">
+        这个控件相比我们之前使用的 OrbitControls
+        容易分辨不清楚上下左右的关系，两者之间的差异 等使用后就知道了..
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/TrackballControls.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+   ysThree.init({
+       el:document.getElementById('box'),
+       cameraType:1,
+       axes:false,//坐标辅助
+       clearColor:'#000'//画布颜色
+   },(scene,camera,renderer)=>{
+       const box = new THREE.Mesh(new THREE.BoxGeometry(4,4,4),new THREE.MeshBasicMaterial({
+           color:'red'
+       }))
+       scene.add(box)
+
+       function initControls() {
+           const controls = new THREE.TrackballControls( camera , renderer.domElement );
+           //旋转速度
+           controls.rotateSpeed = 5;
+           //变焦速度
+           controls.zoomSpeed = 3;
+           //平移速度
+           controls.panSpeed = 0.8;
+           //是否不变焦
+           controls.noZoom = false;
+           //是否不平移
+           controls.noPan = false;
+           //是否开启移动惯性
+           controls.staticMoving = false;
+           //动态阻尼系数 就是灵敏度
+           controls.dynamicDampingFactor = 0.3;
+           //未知，占时先保留
+           //controls.keys = [ 65, 83, 68 ];
+           return controls
+       }
+       const  controls =  initControls()
+       controls.addEventListener( 'change', function () {
+           renderer.render( scene,camera)
+       })
+
+       function animate() {
+           //更新控制器
+           controls.update()
+           renderer.render(scene,camera)
+           requestAnimationFrame(animate)
+       }
+       animate()
+   })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

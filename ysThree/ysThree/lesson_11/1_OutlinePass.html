@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>OutlinePass</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">OutlinePass</div>
+    <div class="ys-block">
+        OutlinePass：物体边界线条高亮处理，
+    </div>
+</div>
+</body>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/shaders/CopyShader.js"></script>
+<script src="../../plugins/threeLibrary/js/shaders/FXAAShader.js"></script>
+<script src="../../plugins/threeLibrary/js/postprocessing/EffectComposer.js"></script>
+<script src="../../plugins/threeLibrary/js/postprocessing/MaskPass.js"></script>
+<script src="../../plugins/threeLibrary/js/postprocessing/RenderPass.js"></script>
+<script src="../../plugins/threeLibrary/js/postprocessing/ShaderPass.js"></script>
+<script src="../../plugins/threeLibrary/js/postprocessing/OutlinePass.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+        renderer.setPixelRatio( window.devicePixelRatio )
+        renderer.shadowMap.enabled = true
+
+        //add light
+        const directionalLight = new THREE.DirectionalLight( '#fff' )
+        directionalLight.position.set( 30, 30, 30 ).normalize()
+        scene.add( directionalLight )
+        const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+        scene.add(ambientLight)
+
+        const box = new THREE.Mesh(new THREE.BoxBufferGeometry(2,2,2) ,new THREE.MeshBasicMaterial({color:'red'}))
+        box.position.set(0,1,-2)
+        scene.add(box)
+
+        const box2 = new THREE.Mesh(new THREE.BoxBufferGeometry(2,2,2) ,new THREE.MeshBasicMaterial({color:'yellow'}))
+        scene.add(box2)
+        box2.position.set(0,1,2)
+
+        const group = new THREE.Group()
+        group.add(box,box2)
+        group.name = 'oneGroup'
+        scene.add(group)
+
+        /*  ***********/
+        //
+        const composer = new THREE.EffectComposer(renderer)
+        composer.setSize( el.offsetWidth, el.offsetHeight )
+
+        //
+
+        const  renderPass = new THREE.RenderPass( scene, camera );
+        composer.addPass( renderPass )
+
+        //
+        const loader = new THREE.TextureLoader()
+
+        const outlinePass = new THREE.OutlinePass( new THREE.Vector2( el.offsetWidth, el.offsetHeight ), scene, camera );
+        composer.addPass( outlinePass )
+
+        loader.load( '../../images/ysThree/tri_pattern.jpg', texture => {
+            outlinePass.patternTexture = texture
+            texture.wrapS = THREE.RepeatWrapping
+            texture.wrapT = THREE.RepeatWrapping
+        });
+        outlinePass.edgeStrength = 3 //粗
+        outlinePass.edgeGlow = 1 //发光
+        outlinePass.edgeThickness = 1 //光晕粗
+        outlinePass.pulsePeriod = 1 //闪烁
+        outlinePass.usePatternTexture = false //true
+        outlinePass.visibleEdgeColor.set( '#ffffff' );
+        outlinePass.hiddenEdgeColor.set( '#190a05' );
+
+
+        // // 抗锯齿 可要可不要
+        // const effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
+        // effectFXAA.uniforms[ 'resolution' ].value.set( 1 / el.offsetWidth, 1 /  el.offsetHeight );
+        // effectFXAA.renderToScreen = true;
+       // composer.addPass( effectFXAA )
+
+        //
+        let selectedObjects = []
+        el.addEventListener('mousemove' ,function (event) {
+            const objList = ysThree.getIntersectObject(el,event,scene,true).objectList
+            if(objList.length > 0){
+              /*  if(objList[0].object.isMesh){
+                    selectedObjects = []
+                    selectedObjects.push(objList[0].object)
+                    outlinePass.selectedObjects = selectedObjects;
+                }else{
+                    outlinePass.selectedObjects = [];
+                }*/
+                const g = objList[0].object.parent //如果是个group
+                if(g && g.name === 'oneGroup') {
+                    selectedObjects = []
+                    selectedObjects.push(g)
+                    outlinePass.selectedObjects = selectedObjects
+                    document.body.style.cursor = 'pointer'
+                }else{
+                    outlinePass.selectedObjects = []
+                    document.body.style.cursor = 'auto'
+                }
+            }else{
+                outlinePass.selectedObjects = []
+                document.body.style.cursor = 'auto'
+            }
+
+        })
+
+        $(window).resize(function () {
+            composer.setSize( el.offsetWidth, el.offsetHeight )
+           // effectFXAA.uniforms[ 'resolution' ].value.set( 1 / el.offsetWidth, 1 / el.offsetHeight );
+        })
+
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 1000;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+        const clock= new THREE.Clock()
+        function animate() {
+            requestAnimationFrame(animate)
+
+            //renderer.render(scene,camera)
+            controls.update(clock.getDelta())
+            composer.render()
+
+        }
+        animate()
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

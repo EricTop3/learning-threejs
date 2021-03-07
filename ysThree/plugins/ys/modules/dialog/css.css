@@ -1,0 +1,56 @@
+.ys-dialog-layer,.ys-dialog{
+    position: fixed;
+    z-index: 9999;
+}
+.ys-dialog-layer{
+    background-color: rgba(0,0,0,.5);
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+}
+/*高度不固定 偏上 有蒙层*/
+.ys-dialog-layer-main{
+    position: relative;
+    background-color: #fff;
+    margin:15vh auto 45px auto;
+    box-shadow:0 0 10px #fff;
+    max-width: 90%;
+}
+
+/*宽高固定 居中 没有蒙层*/
+.ys-dialog{
+    left:50%;
+    top: 50% ;
+    box-shadow:0 0 10px #c9c9c9;
+    background-color: #fff;
+}
+.dialog-close-icon{
+    position: absolute;
+    right:10px;
+    top:10px;
+    font-size: 16px;
+}
+.dialog-close-icon:hover{
+    color:red;
+    opacity: 1;
+    cursor: pointer;
+}
+.ys-dialog-con{
+    padding: 40px 15px 15px 15px;
+}
+.ys-dialog-tit{
+    padding: 10px 30px 10px 15px;
+}
+.ys-dialog-tit+.ys-dialog-con{
+    padding-top: 10px;
+}
+.ys-dialog-btns{
+    text-align: right;
+    padding: 15px 15px 15px 15px;
+}
+.ys-dialog .ys-dialog-btns{
+    position: absolute;
+    right:0;
+    bottom:0;
+}

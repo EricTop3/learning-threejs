@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>gltf</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+    <style>
+        form *{color:#fff;}  form .ys-select-options *{color:#000;}
+    </style>
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+    <form class="ys-form" action="javascript:;">
+        <div class="ys-input-item">
+            <div class="ys-input-label">车身</div>
+            <div class="ys-input-block">
+                <select class="ys-select my-select" name="body" ys-unique="ys-select-1" ys-clearable="true">
+                    <option value="">请选择</option>
+                    <option value="0" selected>orange</option>
+                    <option value="1">blue</option>
+                    <option value="2">red</option>
+                    <option value="3">black</option>
+                    <option value="4">white</option>
+                    <option value="5">metallic</option>
+                </select>
+            </div>
+        </div>
+        <div class="ys-input-item">
+            <div class="ys-input-label">玻璃</div>
+            <div class="ys-input-block">
+                <select class="ys-select my-select" name="grass" ys-unique="ys-select-2" ys-clearable="true">
+                    <option value="">请选择</option>
+                    <option value="0" selected>clear</option>
+                    <option value="1">red</option>
+                    <option value="2">blue</option>
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">gltf</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/DRACOLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/GLTFLoader.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    ys.form.render()
+
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+        renderer.setPixelRatio( window.devicePixelRatio )
+        renderer.shadowMap.enabled = true;
+        //add light
+        const ambientLight = new THREE.AmbientLight('rgba(255,252,255)',0.5)
+        scene.add(ambientLight)
+        const directionalLight = new THREE.DirectionalLight( 0xffeedd,2 );
+        directionalLight.position.set( 4, 2, 4)
+        scene.add( directionalLight )
+
+        const  ground = new THREE.Mesh(
+            new THREE.PlaneBufferGeometry( 400, 400 ),
+            new THREE.MeshBasicMaterial( { color: 0x6e6a62, depthWrite: false ,side:THREE.DoubleSide } )
+        );
+        ground.rotation.x = - Math.PI / 2;
+        ground.renderOrder = 1;
+        scene.add( ground );
+        const grid = new THREE.GridHelper( 400, 80, 0x000000, 0x000000 );
+        grid.material.opacity = 0.1;
+        grid.material.depthWrite = false;
+        grid.material.transparent = true;
+        scene.add( grid );
+
+
+        //模拟周围
+        const texture = new THREE.CubeTextureLoader()
+            .setPath( '../../images/ysThree/allScene/' )
+            .load( [
+                'px.jpg',//右(-1,0,0)
+                'nx.jpg',//左(1,0,0)
+                'py.jpg',//上(1,0,0)
+                'ny.jpg',//下(-1,0,0)
+                'pz.jpg',//前(0,0,1)
+                'nz.jpg'//后(0,0,-1)
+            ] );
+        texture.format = THREE.RGBFormat;
+        texture.mapping = THREE.CubeReflectionMapping;
+        const shader = THREE.ShaderLib["cube"];
+        // shader.uniforms["tCube"].value = texture; //老版本
+        const material = new THREE.ShaderMaterial({
+            fragmentShader: shader.fragmentShader,
+            vertexShader: shader.vertexShader,
+            uniforms: shader.uniforms,
+            // depthWrite: false,
+            side: THREE.DoubleSide
+        });
+        material.envMap = texture; //新版本
+        let skyBox = new THREE.Mesh(new THREE.BoxGeometry(800, 800, 800), material);
+        scene.add(skyBox)
+
+        /*  ***********/
+        const loadingDom =  ysThree.loading("object文件")
+
+        let  car
+        let carParts = {
+            body: [],
+            rims:[],
+            glass: [],
+        };
+        const	loader = new THREE.GLTFLoader()
+        const dracoLoader = new THREE.DRACOLoader()
+        const wheels = []
+        dracoLoader.setDecoderPath( '../../plugins/threeLibrary/js/libs/draco/' );
+        loader.setDRACOLoader( dracoLoader )
+        loader.load("../../data/ysThree/models/gltf/ferrari/ferrari.glb",function (glb) {
+            car = glb.scene
+            car.traverse( function ( child ) {
+                if ( child.isMesh  ) {
+                    child.material.envMap = texture;
+                }
+            });
+
+            car.position.set(0,0,0)
+            car.scale.set(2,2,2)
+            scene.add( car )
+
+            // car parts for material selection
+            carParts.body.push( car.getObjectByName( 'body' ))
+            carParts.glass.push(car.getObjectByName( 'glass' ))
+            wheels.push(
+                car.getObjectByName( 'wheel_fl' ),
+                car.getObjectByName( 'wheel_fr' ),
+                car.getObjectByName( 'wheel_rl' ),
+                car.getObjectByName( 'wheel_rr' )
+            );
+
+            const materialsLib = {
+                body: [
+                    new THREE.MeshStandardMaterial( { color: 0xff4400, envMap: texture,metalness: 0.9, roughness: 0.2, name: 'orange' } ),
+                    new THREE.MeshStandardMaterial( { color: 0x001166, envMap: texture,metalness: 0.9, roughness: 0.2, name: 'blue' } ),
+                    new THREE.MeshStandardMaterial( { color: 0x990000, envMap: texture, metalness: 0.9, roughness: 0.2, name: 'red' } ),
+                    new THREE.MeshStandardMaterial( { color: 0x000000, envMap: texture,metalness: 0.9, roughness: 0.5, name: 'black' } ),
+                    new THREE.MeshStandardMaterial( { color: 0xffffff, envMap: texture, metalness: 0.9, roughness: 0.5, name: 'white' } ),
+                    new THREE.MeshStandardMaterial( { color: 0x555555, envMap: texture,envMapIntensity: 2.0, metalness: 1.0, roughness: 0.2, name: 'metallic' } ),
+                ],
+                glass: [
+                    new THREE.MeshStandardMaterial( { color: 'white', envMap: texture, metalness: 1, roughness: 0, opacity: 0.2, transparent: true, premultipliedAlpha: true, name: 'clear' } ),
+                    new THREE.MeshStandardMaterial( { color: 'red', envMap: texture,metalness: 1, roughness: 0, opacity: 0.8, transparent: true, premultipliedAlpha: true, name: 'red' } ),
+                    new THREE.MeshStandardMaterial( { color: 'blue', envMap: texture, metalness: 1, roughness: 0, opacity: 0.8, transparent: true, premultipliedAlpha: true, name: 'blue' } ),
+                ],
+
+            }
+
+
+            ys.monitor.on("ys-select-1",function (e) {
+                carParts.body[0].material = materialsLib.body[e.value]||materialsLib.body[0]
+            })
+            ys.monitor.on("ys-select-2",function (e) {
+                carParts.glass[0].material = materialsLib.glass[e.value ]||materialsLib.glass[0]
+            })
+
+            document.body.removeChild(loadingDom)
+        })
+
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 200;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+
+
+        //
+        // //或者监听controls改变才渲染
+        // controls.addEventListener('change',function () {
+        //     renderer.render(scene,camera)
+        // })
+        //
+        function animate() {
+            controls.update()
+            renderer.render(scene,camera)
+            requestAnimationFrame(animate)
+            wheels.forEach(e =>{
+                   e.rotateX(-0.05)
+            })
+
+            /** 动画 */
+        }
+        animate()
+
+        /**
+         *  someAction.stop() ：停止指定动作 ，并还原动作
+         *  mixer.stopAllAction()：停止所有动作，但动作不还原
+         */
+    })
+
+
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

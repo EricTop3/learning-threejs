@@ -1,0 +1,209 @@
+/* 反正 180*/
+.ys-rotateZ-180{
+    transform: rotateZ(180deg);
+}
+.ys-rotateZ-90{
+    transform: rotateZ(90deg);
+}
+/*显示隐藏*/
+.ys-init-box{
+    opacity: 0;
+}
+.ys-init-box.left-to-right{
+    animation: ysInitBoxF1 0.5s forwards;
+}
+.ys-init-box.right-to-left{
+    animation: ysInitBoxF2 0.5s forwards;
+}
+.ys-init-box.top-to-bottom{
+    animation: ysInitBoxF3 0.5s forwards;
+}
+.ys-init-box.bottom-to-top{
+    animation: ysInitBoxF4 0.5s forwards;
+}
+.ys-init-box.scale-to-boom{
+    animation: ysInitBoxF5 0.5s forwards;
+}
+.ys-fadeIn{
+    opacity: 0;
+    animation: ysInitBoxF6 0.5s forwards;
+}
+@keyframes ysInitBoxF1 {0%{transform:translateX(-50px);opacity:0}100%{transform: translateX(0);opacity: 1}}
+@keyframes ysInitBoxF2 {0%{transform:translateX(50px);opacity:0}100%{transform: translateX(0);opacity: 1}}
+@keyframes ysInitBoxF3 {0%{transform:translateY(-50px);opacity:0}100%{transform: translateY(0);opacity: 1}}
+@keyframes ysInitBoxF4 {0%{transform:translateY(50px);opacity:0}100%{transform: translateY(0);opacity: 1}}
+@keyframes ysInitBoxF5 {0%{transform:scale(0);opacity:0}100%{transform: scale(1);opacity: 1}}
+@keyframes ysInitBoxF6 {0%{opacity:0}100%{opacity:1}}
+/*一直转*/
+.ys-rotateZ-loop{
+    display: inline-block;
+    animation:ysRotateZLoop 1s linear infinite;
+}
+@keyframes ysRotateZLoop{
+    0%{transform: rotateZ(0);}
+    100%{transform: rotateZ(360deg);}
+}
+/* 抖动*/
+.ys-shake-rotate{
+    text-align: center;
+    animation: shakeRotate .1s linear forwards 5;
+}
+@keyframes shakeRotate {
+    0% {transform: translate(0px, 0px) rotate(0deg)}
+    20% {transform: translate(0px, 0px) rotate(-6.5deg)}
+    40% {transform: translate(0px, 0px) rotate(4.5deg)}
+    60% {transform: translate(0px, 0px) rotate(-3.5deg)}
+    80% {transform: translate(0px, 0px) rotate(1.5deg)}
+    98% {transform: translate(0px, 0px) rotate(6.5deg)}
+}
+/*其他animate*/
+/*闪烁*/
+.ys-animate-shine{
+    animation:lampShine 0.3s linear infinite alternate;
+}
+@keyframes lampShine {
+    from{opacity: 1}
+    to{opacity: 0.1}
+}
+/*水波*/
+.ys-animate-wave{
+    position: relative;
+    min-width:50px;
+    min-height:50px;
+}
+.ys-animate-wave>div{
+    position: absolute;
+    top:0;
+    right:0;
+    bottom: 0;
+    left:0;
+    border: 2px solid #14AE68;
+    border-radius: 100%;
+    animation: waveRun 4s infinite;
+    opacity: 0;
+}
+@keyframes waveRun {
+    from{transform: scale(0);opacity: 1;border-width: 2px}
+    to{transform: scale(1);opacity: 0;border-width: 15px}
+}
+
+/*hover效果*/
+.ys-hover{
+    opacity: 0.8;
+    transition: all 0.35s;
+    cursor: pointer;
+}
+.ys-hover:hover{
+    opacity:1
+}
+.ys-hover:active{
+    opacity: 0.8
+}
+.ys-hover-shadow,.ys-hover-scale,.ys-hover-shadow-scale,.ys-hover-rotateZ180,.ys-hover-translateY,.ys-hover-shadow-translateY{
+    transition:all .35s!important;
+    cursor: pointer;
+}
+.ys-hover-img-box{
+    overflow: hidden;
+}
+.ys-hover-scale-slow,.ys-hover-img-box img{
+    transition:all 1s;
+    cursor: pointer
+}
+.ys-hover-shadow:hover{
+    box-shadow: 0 0 10px #c9c9c9
+}
+.ys-hover-shadow,.ys-hover-shadow:active{
+    box-shadow: 0 0 0 #c9c9c9
+}
+.ys-hover-scale:hover,.ys-hover-scale-slow:hover,.ys-hover-img-box:hover img{
+    transform: scale(1.1)
+}
+.ys-hover-scale,.ys-hover-scale-slow,.ys-hover-scale:active,.ys-hover-scale-slow:active,.ys-hover-img-box:active img{
+    transform: scale(1)
+}
+.ys-hover-shadow-scale:hover{
+    transform: scale(1.1);
+    box-shadow: 0 0 10px #c9c9c9
+}
+.ys-hover-shadow-scale,.ys-hover-shadow-scale:active{
+    transform: scale(1);
+    box-shadow: 0 0 0 #c9c9c9
+}
+.ys-hover-rotateZ180:hover{
+    transform: rotateZ(180deg)
+}
+.ys-hover-rotateZ180,.ys-hover-rotateZ180:active{
+    transform: rotateZ(0)
+}
+.ys-hover-translateY:hover{
+    transform: translateY(-20px)
+}
+.ys-hover-shadow-translateY:hover{
+    transform: translateY(-20px);
+    box-shadow: 0 0 10px #c9c9c9
+}
+/*双层盒子hover*/
+/************层叠盒子的hover效果 ***********/
+.ys-box-forward,.ys-box-back{
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom: 0
+}
+.ys-box-forward{
+    z-index:2
+}
+.ys-box-reverse .ys-box-forward,.ys-box-reverse .ys-box-back,
+.ys-box-flip-over .ys-box-forward,.ys-box-flip-over .ys-box-back,
+.ys-box-rotate-open .ys-box-forward,.ys-box-rotate-open .ys-box-back,
+.ys-box-rotate-fade .ys-box-forward,.ys-box-rotate-fade .ys-box-back,
+.ys-box-slide-left .ys-box-forward,.ys-box-slide-left .ys-box-back
+{
+    transition: all 1s;
+}
+/*ys-box-reverse*/
+.ys-box-reverse:hover .ys-box-forward{
+    transform: rotateY(-180deg);
+    opacity: 0
+}
+.ys-box-reverse .ys-box-back{
+    transform: rotateY(-180deg);
+    opacity: 0;
+    z-index: 3
+}
+.ys-box-reverse:hover .ys-box-back{
+    transform: rotateY(0);
+    opacity:1
+}
+.ys-box-flip-over .ys-box-forward{
+    transform-origin :0 100% 0
+}
+.ys-box-flip-over .ys-box-back,.ys-box-rotate-open .ys-box-back,.ys-box-rotate-fade .ys-box-back,.ys-box-slide-left .ys-box-back{
+    opacity: 0
+}
+.ys-box-flip-over:hover .ys-box-back,.ys-box-rotate-open:hover .ys-box-back,.ys-box-rotate-fade:hover .ys-box-back,.ys-box-slide-left:hover .ys-box-back{
+    opacity: 1
+}
+.ys-box-flip-over:hover .ys-box-forward{
+    transform: rotateY(-180deg)
+}
+.ys-box-rotate-open .ys-box-forward{
+    transform-origin : 0 0 0
+}
+.ys-box-rotate-open:hover .ys-box-forward{
+    transform: rotate(120deg)
+}
+.ys-box-rotate-fade .ys-box-forward{
+    transform-origin :100% 0 0
+}
+.ys-box-rotate-fade:hover .ys-box-forward{
+    transform: rotateY(180deg) translateX(100%);
+    opacity: 0;
+    z-index: 0
+}
+.ys-box-slide-left:hover .ys-box-forward{
+    transform:translateX(-100%);
+    opacity: 0.5
+}

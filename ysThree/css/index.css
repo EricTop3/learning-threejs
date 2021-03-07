@@ -1,0 +1,68 @@
+.big-tit{
+    font-size: 50px;
+    text-align: center;
+}
+.center-tit{
+    font-size: 30px;
+    text-align: center;
+    margin-top: 30px;
+}
+.center{
+    position: absolute;
+    top:50%;
+    margin-top: -120px;
+    left:0;
+    right:0;
+}
+.box{
+    display: block;
+    background-color: #fff;
+    margin: 15px 15px;
+    box-sizing: border-box;
+    padding: 15px 15px 50px 15px;
+    height:150px;
+}
+.box-tit{
+    font-size: 20px;
+    margin:0 0 30px 0;
+}
+.box-label{
+    color:#666;
+    line-height: 24px;
+}
+.bottom{
+    background-color: #f3f3f3;
+    padding: 30px 0 50px 0
+}
+.down-icon{
+    position: absolute;
+    left:50%;
+    bottom:30px;
+    width: 40px;
+    margin-left: -20px;
+    cursor: pointer;
+}
+.down-icon .ys-icon{
+    font-size: 40px;
+}
+.ys-dropdown-title a{
+    color:#fff;
+}
+.down-load{
+    position: fixed;
+    right:20px;
+    top:10px;
+}
+.total{
+    position: absolute;
+    top:-300px;
+    left:0;
+    height:300px;
+    right:0;
+    background-color:rgba(0,0,0,0.5);
+}
+.bottom-tip{
+    font-size: 10px;
+    text-align: center;
+    margin: 10px 0;
+}

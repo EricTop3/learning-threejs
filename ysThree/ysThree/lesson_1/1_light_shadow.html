@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>灯光阴影简单示例</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="container ys-absolute-container" id="container" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">灯光和阴影介绍</div>
+    <div class="ys-block">
+        <p>前章节我们说到相机，这里我们简单看一下灯光和阴影(后面章节我们会重点学习)</p>
+        <p>经过这两节的代码熟悉 我们知道了 THREE的 三大必要条件 ：scene,camera,renderer</p>
+        <p>场景中必然有物体，有物体就可能有灯光，有灯光就可能有阴影...</p>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script>
+    const container = $("#container"),
+        width = container.width(),
+        height = container.height();
+
+    /*场景*/
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0xffffff, 0.015,100);//雾化效果
+
+    /* 相机 */
+    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); //视角 宽高比 近平面距离
+
+    //将相机位置和视点放在场景中间
+    camera.position.set(-30,40,30)
+    camera.lookAt(scene.position);
+
+    /*渲染器*/
+    const renderer = new THREE.WebGLRenderer({
+        antialias : true
+    });
+    renderer.setSize(width, height);
+    container.append(renderer.domElement); //将dom加入
+    renderer.setClearColor('#B4D3BA');
+
+    //坐标轴辅助
+    const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+    scene.add(axes);
+
+    /*添加光源*/
+    /**
+     PointLight( color, intensity, distance, decay )
+     color — 颜色的RBG数值。
+     intensity — 光强的数值。
+     distance -- 光强为0处到光源的距离，0表示无穷大。
+     decay -- 沿着光照距离的衰退量。
+     灯光也有很多种类的 这里不介绍了，可见文档
+     */
+    //通过SpotLight创建一个光源
+    const spotLight = new THREE.SpotLight(0xffffff);
+    //从-40,60,-10这个三维坐标处照射我们的场景
+    spotLight.position.set(-40, 60, -10);
+    //添加光源到场景
+    scene.add(spotLight);
+
+    /*给物体添加光感材质*/
+    //普通材质MeshBasicMaterial对光源是没有反应的，所以我们要修改为对光源产生反应的MeshLambertMaterial和MeshPhongMaterial
+    //给平面添加材质
+    const planeGeometry = new THREE.PlaneGeometry(60, 20);
+    const planeMaterial = new THREE.MeshLambertMaterial({
+        color: 0xffffff,
+        side:THREE.DoubleSide //两面 // THREE.FrontSide 、THREE.BackSide
+    });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    //水平面旋转并且设置位置
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+    scene.add(plane);
+
+    //给方块添加材质
+    const cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+    const cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    //设置方块位置
+    cube.position.x = -4;
+    cube.position.y = 3;
+    cube.position.z = 0;
+    scene.add(cube);
+
+    //给球体添加材质
+    const sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+    const sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    //设置球体位置
+    sphere.position.x = 20;
+    sphere.position.y = 4;
+    sphere.position.z = 2;
+    scene.add(sphere);
+
+    //告诉渲染器，我们需要阴影映射
+    renderer.shadowMap.enabled = true;
+    //对每个物体进行阴影设置，接受阴影还是投射阴影
+    //平面是接受阴影
+    plane.receiveShadow = true;
+    //方块投射阴影
+    cube.castShadow = true;
+    //球体投射阴影
+    sphere.castShadow = true;
+    //需要给光源同样设置投射阴影
+    spotLight.castShadow = true;
+
+
+    let i = 0.001
+    setInterval(()=>{ //后面我们采用其他方法
+        i = i + 0.001
+        plane.rotation.x = i * Math.PI;
+        cube.rotation.x = i * Math.PI;
+        renderer.render(scene, camera)
+    })
+    renderer.render(scene, camera)
+
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Layers</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">Layers</div>
+    <div class="ys-block">
+        threejs提供了层次的支持。和相机处于同一层次的对象可见，否则不可见。在threejs中，最多可以设置32层，默认的层次是1。<br/>
+        层次在有些系统中很有用，可以将不同的模式的对象设成不同的层次，这样，切换模式就只需切换一下相机的层次就可以了。<br/>
+        官方释义：
+        Layers对象将一个Object3D分配给一个或多个层，这些层的编号为0到31——在内部，这些层存储为一个位掩码，在默认情况下，所有Object3D都是第0层的成员。<br/>
+        这可以用来控制可见性——对象必须与摄像机共享一个层，以便在呈现摄像机视图时可见。<br/>
+        所有继承Object3D的对象都有此属性<br/>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+   ysThree.init({
+       el:document.getElementById('box'),
+       cameraType:1,
+       axes:true,//坐标辅助
+       clearColor:'#000'//画布颜色
+   },(scene,camera,renderer)=>{
+       const geometry = new THREE.PlaneGeometry(10,2);
+       const material = new THREE.MeshBasicMaterial({color:0x00ff00});
+       const mesh = new THREE.Mesh(geometry,material);
+       scene.add(mesh);
+
+       const geometry2 = new THREE.PlaneGeometry(2,10);
+       const mesh2 = new THREE.Mesh(geometry2,material);
+       scene.add(mesh2);
+
+       //如图 两个面重叠 , 相机在两个层面的切换.
+       setTimeout(()=>{
+           const layers = new THREE.Layers(); //0 - 31
+           layers.set(2)
+           mesh2.layers = layers;
+           renderer.render(scene,camera)
+           setTimeout(()=>{
+               camera.layers = layers
+              // camera.layers.enable( 2 ); // default 0 表示 这个层次也可看到
+               renderer.render(scene,camera)
+           },1000)
+       },1000)
+
+       /* 还可以
+       camera.layers.enable( 2 ) 这个层次也可看到
+
+       camera.layers.toggle( 1 ) 这个层次切换可看到
+       */
+   })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

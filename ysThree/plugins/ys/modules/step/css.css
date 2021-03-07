@@ -1,0 +1,130 @@
+.ys-steps{
+    display: none;
+    position: relative;
+}
+.ys-steps-normal .ys-step-box{
+    float: left;
+    position: relative;
+}
+.ys-step-line{
+    background-color: rgba(0,0,0,.1)
+}
+.ys-steps-normal .ys-step-line{
+    position: absolute;
+    left:10px;
+    right:-10px;
+    height:4px;
+    top:63px;
+    z-index: -1;
+}
+.ys-step-line .ys-step-line-bar{
+    position: absolute;
+    top:0;
+    background-color: #14AE68;
+    transition: all 0.8s;
+}
+.ys-steps-normal .ys-step-line-bar{
+    left:0;
+    width: 0;
+    bottom: 0;
+}
+.ys-steps-vertical .ys-step-line-bar{
+    left:0;
+    height: 0;
+    right: 0;
+}
+.ys-steps .ys-step-tit{
+    line-height: 30px;
+    overflow: hidden;
+    font-size: 18px;
+    padding: 10px 0;
+}
+.ys-step-icon .ys-step-circle{
+    width: 30px;
+    height:30px;
+    background-color: #fff;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 30px;
+    border: 1px solid #ddd;
+    transition: all 0.8s;
+}
+.ys-steps .ys-step-box.ys-on .ys-step-circle{
+    background-color: #14AE68;
+    color:#fff;
+    border-color: #14AE68;
+}
+.ys-steps-normal .ys-step-box.ys-on .ys-step-line-bar{
+    width: 100%;
+}
+.ys-steps-vertical .ys-step-box.ys-on .ys-step-line-bar{
+    height: 100%;
+}
+.ys-steps-normal .ys-step-bar-run{
+    width:20%!important;
+    animation: sBarRun 1s infinite linear;
+}
+@keyframes sBarRun {
+    0%{left:0}
+    100%{left:95%}
+}
+.ys-steps-vertical  .ys-step-bar-run{
+    height:20%!important;
+    animation: sBarRun2 1s infinite linear;
+}
+@keyframes sBarRun2 {
+    0%{top:0}
+    100%{top:-100%}
+}
+.ys-steps-normal .ys-step-tips{
+    font-size: 12px;
+    color: #666;
+    line-height: 22px;
+    margin-top: 5px;
+    padding: 0 10px;
+    overflow: hidden;
+}
+.ys-steps-center .ys-step-icon{
+    margin: 0 auto;
+    text-align: center;
+}
+.ys-steps-center .ys-step-tit,.ys-steps-center .ys-step-tips{
+    text-align: center;
+}
+.ys-steps-center .ys-step-line{
+    left:50%;
+    right:-50%;
+}
+.ys-steps-center .ys-step-icon{
+    width: 30px;
+    height: 30px;
+}
+.ys-steps-vertical .ys-step-box{
+    position: relative;
+    float: none;
+}
+.ys-steps-vertical .ys-step-icon{
+    float: left;
+}
+.ys-steps-vertical .ys-step-tit{
+    overflow: hidden;
+    margin-left: 50px;
+}
+.ys-steps-vertical .ys-step-line{
+    position: absolute;
+    top:28px;
+    left:14px;
+    bottom: 0;
+    width: 4px;
+    min-height: 50px;
+    z-index: -1;
+}
+.ys-steps-vertical .ys-step-tips{
+    margin:0 10px 15px 50px;
+    font-size: 12px;
+    color: #666;
+    line-height: 22px;
+}
+.ys-steps-vertical .ys-step-tit{
+    padding:  0 15px 10px 0;
+}

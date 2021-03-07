@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>depthTest</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">depthTest</div>
+    <div class="ys-block">
+        深度测试 <br/>
+        深度测试可以实现：远的看着模糊，近的看着清楚，被遮住的看不见等效果 <br/>
+        例如一个立方体，怎么设置为看得见得边为实线，看不见的边为虚线？ <br/>
+        可以给立方体每条边都画上实线和虚线，实线的depthTest设为true，虚线的depthTest设为false： <br/>
+        但不推荐使用和修改
+        <br />
+        深度测试的例子，你会发现有几条边即可以看见实线，也可以看见虚线，两种重叠到一起，若隐若现。这种问题就是z-fighting导致的。  <br />
+        因为实线和虚线靠得太近，它们的深度太接近，导致threejs无法正确的区分出谁前谁后，就会出现闪烁问题。  <br />
+        这时可以给正方形设置polygonOffset属性，这个属性的作用是：当两个图形在同一个像素上的深度相同时（也就是深度发生了冲突），  <br />
+        将设置了polygonOffset属性的图形的深度值加上一小段偏移，从而避免冲突。  <br />
+        polygonOffset 不仅可以解决这个问题，通常在文字叠加出现闪动时也可以解决
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+   ysThree.init({
+       el:document.getElementById('box'),
+       cameraType:1,
+       axes:false,//坐标辅助
+       clearColor:'#000'//画布颜色
+   },(scene,camera,renderer)=>{
+       const box = new THREE.Mesh(new THREE.BoxGeometry(4,4,4),new THREE.MeshBasicMaterial({
+           color:'#fff'
+       }))
+       scene.add(box)
+
+
+       //画实线
+       function drawLine(v1,v2){
+           const geometry = new THREE.Geometry();
+           //设置depthTest属性为true，表示被挡住的边就看不见
+           const lineMaterial = new THREE.LineBasicMaterial({ vertexColors: false,depthTest:true,color:'#000'});
+           const p1 = new THREE.Vector3();
+           p1.copy(v1);
+           const p2 = new THREE.Vector3();
+           p2.copy(v2);
+           geometry.vertices.push(p1);
+           geometry.vertices.push(p2);
+           const line = new THREE.Line(geometry,lineMaterial,THREE.LineSegments );
+           return line;
+       }
+
+       //画虚线
+       function drawDashLine(v1,v2){
+           const geometry = new THREE.Geometry();
+           //设置depthTest属性为false，表示被挡住的边也看得见
+           const lineMaterial = new THREE.LineDashedMaterial({ color:'red' ,dashSize:0.6,gapSize:0.2,scale:0.3,depthTest:false})
+           const p1 = new THREE.Vector3();
+           p1.copy(v1);
+           const p2 = new THREE.Vector3();
+           p2.copy(v2);
+           geometry.vertices.push(p1);
+           geometry.vertices.push(p2);
+           const line = new THREE.Line(geometry,lineMaterial,THREE.LineSegments);
+           line.computeLineDistances();
+           return line
+       }
+
+       const line1 = drawLine(new THREE.Vector3(-2,-1.8,2),new THREE.Vector3(2,-1.8,2)) //实
+       const line2 = drawDashLine(new THREE.Vector3(-2,-1.8,-2),new THREE.Vector3(2,-1.8,-2))//虚
+       scene.add( line1)
+       scene.add( line2)
+
+       /*
+
+       var material = new THREE.MeshBasicMaterial({
+           color:0xCCCCCC,
+           transparent:false,
+           polygonOffset:true
+           ,polygonOffsetFactor:0.5
+       });
+
+       */
+   })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

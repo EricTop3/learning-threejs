@@ -1,0 +1,33 @@
+.ys-driver{
+    z-index: 99991;
+    overflow: hidden;
+    background-color: rgba(0,0,0,0.7);
+}
+.ys-driver-on{
+    position: relative;
+    z-index: 99992;
+}
+.ys-driver-btns{
+    margin: 20px 0 10px 0;
+    padding: 0 10px;
+}
+.ys-driver-btns-right{
+    float: right;
+    text-align: right;
+}
+.ys-driver-next .ys-icon{
+    margin:0 0 0 1px;
+    position: relative;
+    top:-1px;
+}
+.ys-driver-pre .ys-icon{
+    margin-right: 1px;
+    position: relative;
+    top:-1px;
+}
+.ys-driver-highlight{
+    display: none;
+    position: fixed;
+    z-index:99991;
+    background-color: #fff;
+}

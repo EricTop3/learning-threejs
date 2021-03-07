@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>标题</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+    <style>
+        pre{
+            font-size: 14px;
+            line-height: 25px;
+        }
+        pre code{
+            margin: 10px 0;
+            display: block;
+            background-color:#2B2B2B ;
+            color:#A4C14F;
+        }
+    </style>
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="">
+     <div class="ys-tit">
+         用户体验和性能优化
+     </div>
+     <div class="ys-block">
+         <div class="ys-tit-sm">
+             <span>合理执行渲染方法.render()</span>
+         </div>
+         <div class="ys-block-con">
+              <pre>
+             Threejs渲染器的.render()方法每次执行都需要调用大量的CPU、GPU等硬件资源，所以为了提高渲染性能，可以考虑尽量减少.render()的执行次数，
+             这里说的尽量减少.render()的执行次数，不是简单地说越少越好，而是要在考虑渲染效果的基础上减少.render()的执行次数。
+             比如鼠标控件OrbitControls，当通过OrbitControls控件旋转缩放三维模型的时候，触发渲染器进行渲染。
+              <code>
+             // 渲染函数
+             function render() {
+               renderer.render(scene, camera);
+             }
+             render();
+             var controls = new THREE.OrbitControls(camera);
+             //监听鼠标事件，触发渲染函数，更新canvas画布渲染效果
+             controls.addEventListener('change', render);
+              </code>
+            </pre>
+         </div>
+         <div class="ys-tit-sm">
+              <span>周期性渲染函数中代码</span>
+         </div>
+         <div class="ys-block-con">
+             <pre>
+             threejs会通过requestAnimationFrame()周期性执行一个渲染函数render(),在渲染函数中除了渲染器.render()方法，
+             其它的尽量放在渲染函数外面，如果必须放在里面的，可以加上if判断尽量加上，不要每次执行render函数的时候，每次都执行没必要执行的代码。
+             </pre>
+         </div>
+         <div class="ys-tit-sm">
+              <span>减面</span>
+         </div>
+         <div class="ys-block-con">
+             <pre>
+             threejs渲染场景中网格模型Mesh的时候，如果网格模型Mesh几何体的三角形面数数量或者说顶点数量越多，那么需要的CPU和GPU的运算量就越大，几何体顶点数据占用的内存就多，
+             这时候对于Threejs每次执行渲染.render()，花费的时间就越多，如果三角形面数过多，可能渲染帧率就会下降，鼠标操作三维模型的时候可能就会比较卡顿。
+             对于项目中使用的三维模型，3D美术往往会进行减面优化，具体减面过程对于程序员而言一般不用关心。
+             对于曲面而言，减面过多，可能会影响显示效果，所以减面程度要控制好。
+             </pre>
+         </div>
+         <div class="ys-tit-sm">
+              <span>法线贴图</span>
+         </div>
+         <div class="ys-block-con">
+             <pre>
+             对于曲面模型，使用法线贴图可以在不影响显示质量的情况下有效减少模型面数，法线贴图会通过图片像素值记录模型表面的几何细节，
+             只需要3D美术对模型表面很多几何细节进行减面后，然后导出法线贴图，提供给程序员加载即可。简单地说就是通过法线贴图可以表达三维模型表面的丰富几何细节。
+             </pre>
+         </div>
+         <div class="ys-tit-sm">
+              <span>BufferGeometry</span>
+         </div>
+         <div class="ys-block-con">
+             <pre>
+             如果通过Threejs提供的几何体类，比如球体、圆柱等几何体类创建几何体，最好使用基类是BufferGeometry而不是Geometry几何体类。
+             </pre>
+         </div>
+         <div class="ys-tit-sm">
+              <span>共享几何体和材质</span>
+         </div>
+         <div class="ys-block-con">
+             <pre>
+             不同的网格模型如果可以共享几何体或材质，最好采用共享的方式，如果两个网格模型无法共享几何体或材质，自然不需要共享，
+             比如两个网格模型的材质颜色不同，这种情况下，一般要分别为网格模型创建一个材质对象。
+             </pre>
+         </div>
+         <div class="ys-tit-sm">
+              <span>多细节层次</span>
+         </div>
+         <div class="ys-block-con">
+             <pre>
+             根据场景不同，可以把同一个模型进行分级，比如远距离观看该模型使用1万面数的模型，如果距离更近，需要使用更精细的模型，比如2万面数;
+             three中也提供了loa处理。
+             </pre>
+         </div>
+         <div class="ys-tit-sm">
+             <span>worker</span>
+         </div>
+         <div class="ys-block-con">
+             <pre>
+              如果可以使用worker的话也是可以的，比如处理大量计算。
+             </pre>
+         </div>
+         <div class="ys-tit-sm">
+             <span>大模型加载</span>
+         </div>
+         <div class="ys-block-con">
+             <pre>
+              1：二进制格式
+                 使用不同文件格式，文件的大小会有所不同，如果同一个模型，导出二进制.fbx大小要比文本格式的.obj文件要小1~2倍。
+                 常见的GLTF格式可以是文本格式，也可以使二进制格式，为了更好的传输性能可以选择二进制格式，.glTF打包转化为.glb二进制文件
+              2：减面和法线贴图
+              3：加载进度条提示
+              4：动态分批加载
+             </pre>
+         </div>
+     </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

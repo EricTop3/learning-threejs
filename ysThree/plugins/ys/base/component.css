@@ -1,0 +1,109 @@
+/*块*/
+.ys-block{
+    margin: 10px 0;
+}
+.ys-block-con{
+    padding: 10px 10px;
+}
+.ys-inline{
+    display: inline-block;
+}
+/* 左右块*/
+.ys-label-block,.ys-input-item{
+    clear:both;
+    line-height: 36px;
+    margin: 5px 0;
+}
+.ys-label-block:after,.ys-input-item:after{
+    content:'\20';
+    clear:both;
+    *zoom:1;
+    display:block;
+    height:0;
+}
+.ys-label-left,.ys-input-label{
+    width: 100px;
+    float: left;
+    text-align: right;
+}
+.ys-label-right{
+    width: 100px;
+    float: right;
+}
+.ys-label-left+.ys-label-con,.ys-input-label+.ys-input-block{
+    position: relative;
+    margin-left: 100px;
+    padding-left: 10px;
+}
+.ys-label-right+.ys-label-con{
+    position: relative;
+    margin-right: 100px;
+    padding-right: 10px;
+}
+/*标题*/
+.ys-tit-sm{
+    line-height: 40px;
+    font-size: 16px;
+    padding-right: 20px;
+}
+.ys-tit-sm span:first-child{
+    border-left:4px solid #14AE68;
+    padding-left: 10px;
+}
+/*遮罩层 其中的弹窗细节 在组件中定义*/
+.ys-layer{
+    display: none;
+    position: fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 9999;
+}
+/*弹窗及对话框标题*/
+.ys-dialog-tit,.ys-layer-main .layer-tit{
+    height: 30px;
+    line-height:30px;
+    text-overflow:ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 18px;
+}
+/*卡片*/
+.ys-card{
+    position: relative;
+    overflow: hidden;
+}
+.ys-card-tit{
+    position: relative;
+    line-height: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 10px 15px;
+    zoom:1;
+    border-bottom: 1px solid #ddd;
+}
+.ys-card-tit:after{
+    content:'\20';
+    clear:both;
+    *zoom:1;
+    display:block;
+    height:0;
+}
+.ys-card-tit a{
+    float: right;
+}
+.ys-card-con{
+    padding: 10px 15px;
+    line-height: 30px;
+}
+/* animateBox*/
+.ys-animateBox{
+    position: relative;
+    overflow: hidden;
+}
+.ys-animateBox .ys-animateBox-item{
+    display: none;
+    transition: all 0.8s;
+}

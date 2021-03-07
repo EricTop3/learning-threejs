@@ -1,0 +1,112 @@
+.ys-transfer{
+    display: none;
+    vertical-align: middle
+}
+.ys-transfer-box{
+    display: inline-block;
+    min-width: 100px;
+    border: 1px solid #ddd;
+    vertical-align: middle
+}
+.ys-transfer-btns{
+    display: inline-block;
+    margin: 0 15px;
+    vertical-align: middle
+}
+.ys-transfer-btn{
+    border:1px solid #ddd;
+    padding: 0 10px;
+    margin: 10px 0;
+    color:#888888;
+    height:30px;
+    line-height: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.ys-transfer-btn .ys-icon{
+    font-size: 28px;
+}
+.ys-transfer-btn.ys-transfer-btn-ok{
+    background-color: #14AE68;
+    color:#fff;
+    border-color:#14AE68;
+}
+.ys-transfer-btn.ys-transfer-btn-ok:hover{
+    opacity: 0.8;
+}
+.ys-transfer-body{
+    min-height: 100px;
+    padding: 15px 10px;
+    overflow: auto;
+    box-sizing: border-box;
+}
+.ys-transfer-body>div{
+    margin: 0 0 15px 0;
+    color:#666
+}
+.ys-transfer-header{
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+.ys-transfer-tit{
+    position: relative;
+    padding: 5px 10px;
+    line-height: 40px;
+    vertical-align: middle;
+}
+.ys-transfer-input-box{
+    position: relative;
+    border: 1px solid #ddd;
+    margin: 0 10px;
+    line-height: 30px;
+    transition: all .35s;
+}
+.ys-transfer-input-box:hover{
+    border-color:#14AE68;
+}
+
+.ys-transfer-input-box .ys-icon{
+    float: left;
+    color:#333;
+    margin: 0 0 0 10px;
+    cursor: pointer;
+    font-size: 20px;
+}
+.ys-transfer-input-box .ys-input{
+    display: block;
+    margin-left:20px;
+    width: auto;
+    border: none;
+    line-height: 30px;
+    height:30px;
+    font-size: 12px;
+    padding: 0 8px;
+}
+.ys-transfer .ys-checkbox{
+    display: none;
+}
+.ys-transfer .ys-checkbox-block{
+    vertical-align: unset!important;
+}
+.ys-transfer .ys-checkbox-block span{
+    margin-left: 10px;
+}
+.ys-transfer-tit span{
+    font-size: 16px;
+    position: relative;
+    line-height: 20px;
+    top:-1px;
+}
+.ys-transfer-input-box .ys-input-clear{
+    top:5px;
+}
+.transfer-count{
+    position: absolute;
+    top:6px;
+    right:10px;
+}
+.transfer-count span{
+    font-size: 12px;
+    color:#666;
+    margin: 0 3px;
+}

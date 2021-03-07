@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>定时器</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <style>
+        .ys-block{
+            margin: 20px 0;
+        }
+        .ys-slide{
+            position: relative;
+            top:6px;
+            margin: 0 0 0 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container ys-absolute-container" id="container" style="overflow: hidden"></div>
+<div class="ys-fix-container">
+    <div class="ys-block clearfix">
+        <div class="ys-input-label">方块速度</div>
+        <div class="ys-input-block">
+            <div class="ys-slide" id="slide1" style="width: 300px"></div>
+        </div>
+    </div>
+    <div class="ys-block clearfix">
+        <div class="ys-input-label">球弹跳速度</div>
+        <div class="ys-input-block">
+            <div class="ys-slide" id="slide2" style="width: 300px"></div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script>
+    const container = $("#container"),
+        width = container.width(),
+        height = container.height();
+
+    /*场景*/
+    const scene = new THREE.Scene();
+
+    /* 相机 */
+    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); //视角 宽高比 近平面距离
+
+    //将相机位置和视点放在场景中间
+    camera.position.set(-30,40,30)
+    camera.lookAt(scene.position);
+
+    /*渲染器*/
+    const renderer = new THREE.WebGLRenderer({
+        antialias : true
+    });
+    renderer.setSize(width, height);
+    container.append(renderer.domElement); //将dom加入
+    renderer.setClearColor('#B4D3BA');
+
+    //坐标轴辅助
+    const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+    scene.add(axes);
+
+    /*添加光源*/
+    //通过SpotLight创建一个光源
+    const spotLight = new THREE.SpotLight(0xffffff);
+    //从-40,60,-10这个三维坐标处照射我们的场景
+    spotLight.position.set(0, 20, 10);
+    //添加光源到场景
+    scene.add(spotLight);
+    //灯光辅助
+    const sphereSize = 1;
+    const pointLightHelper = new THREE.PointLightHelper( spotLight, sphereSize );
+    scene.add( pointLightHelper )
+
+    /*给物体添加光感材质*/
+    //普通材质MeshBasicMaterial对光源是没有反应的，所以我们要修改为对光源产生反应的MeshLambertMaterial和MeshPhongMaterial
+    //给平面添加材质
+    const planeGeometry = new THREE.PlaneGeometry(60, 20);
+    const planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    //水平面旋转并且设置位置
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+    scene.add(plane);
+
+    //给方块添加材质
+    const cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+    const cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    //设置方块位置
+    cube.position.x = -4;
+    cube.position.y = 3;
+    cube.position.z = 0;
+
+    cube.add(new THREE.AxisHelper(5)) //添加参考系
+    scene.add(cube);
+
+    //给球体添加材质
+    const sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+    const sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    //设置球体位置
+    sphere.position.x = 20;
+    sphere.position.y = 4;
+    sphere.position.z = 2;
+    scene.add(sphere);
+
+    //告诉渲染器，我们需要阴影映射
+    renderer.shadowMap.enabled = true;
+
+    //对每个物体进行阴影设置，接受阴影还是投射阴影
+    //平面是接受阴影
+    plane.receiveShadow = true;
+    //方块投射阴影
+    cube.castShadow = true;
+    //球体投射阴影
+    sphere.castShadow = true;
+    //需要给光源同样设置投射阴影
+    spotLight.castShadow = true;
+
+
+    let  step = 0,
+        speed1 = 0.1,
+        speed2 = 0.1
+    function renderScene() {
+        /* *** */
+        cube.rotation.x += speed1;
+        cube.rotation.y += speed1;
+        cube.rotation.z += speed1;
+        step += speed2;
+        sphere.position.x = 20 + ( 10 * (Math.cos(step)));
+        sphere.position.y = 2 + ( 10 * Math.abs(Math.sin(step)));
+        /* *** */
+        requestAnimationFrame(renderScene);
+        renderer.render(scene, camera);
+    }
+    renderScene()
+
+    ys.slide.render({  //后面我们会使用 dat.gui插件
+        name:'#slide1',
+        value:20,
+        min:0,    //0
+        max:100, //0.5
+        input:true,
+        changing:function (res) {
+            speed1 = res * 0.005
+        }
+    })
+    ys.slide.render({
+        name:'#slide2',
+        value:20,
+        min:0,    //0
+        max:100, //0.5
+        input:true,
+        changing:function (res) {
+            speed2 = res * 0.005
+        }
+    })
+</script>
+</html>

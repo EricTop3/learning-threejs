@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>半球灯光</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">灯光</div>
+    <div class="ys-block">
+        <table class="ys-table   ys-table-border">
+            <colgroup>
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>光源名称</th>
+                <td>描述</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>AmbientLight(环境光)</td>
+                <td>这是一种基础光 它的颜色会添加到整个场景和所有对象上</td>
+            </tr>
+            <tr>
+                <td>PointLight(点光源)</td>
+                <td>空间中一点，朝所有的方向发射光线</td>
+            </tr>
+            <tr>
+                <td>SpotLight(聚光灯光源)</td>
+                <td>这种光源有聚光的效果，手电筒，吊灯等</td>
+            </tr>
+            <tr>
+                <td>DirectionalLight(方向光/平行光)</td>
+                <td>也称作无限光，从这种光源发出的光可以看作是平行的，类似于太阳光</td>
+            </tr>
+            <tr>
+                <td>HemisphereLight(半球光)</td>
+                <td>这是一种特殊的光源，可以用来创建更加自然的室外光线，模拟反光面和光线较弱的天空</td>
+            </tr>
+            <tr>
+                <td>AreaLight(面光源)</td>
+                <td>使用这种光源可以指定散发光线的平面，而不是空间中的一个点</td>
+            </tr>
+            <tr>
+                <td>LensFlare(镜头眩光)</td>
+                <td>这不是一种光源，但可以通过它为场景中的光源添加眩光效果</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="ys-tit-sm">
+            * 其中AmbientLight，PointLight，SpotLight和DirectionalLight是基础光源，HemisphereLight，AreaLight，LensFlare是有特殊用途的光源
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/dat.gui.min.js"></script>
+<script>
+    function init(callback) {
+        const container = $("#box"),
+            width = container.width(),
+            height = container.height()
+        //场景
+        const scene = new THREE.Scene();  // 场景
+        scene.fog = new THREE.Fog(0xaaaaaa, 0.010, 200);
+        //相机
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        camera.position.set(-20,15,45)
+        camera.lookAt(scene.position);
+
+        //渲染器
+        const renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+        renderer.setClearColor('#efefef');
+
+        //坐标轴辅助
+        const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+        scene.add(axes);
+
+        callback(scene,camera,renderer)
+
+    }
+    init((scene,camera,renderer)=> {
+
+        /*
+         // 被 TextureLoader替代
+        const textureGrass = THREE.ImageUtils.loadTexture("../images/ysThree/grass_ground.jpg",{},function () {
+            renderer.render(scene,camera)
+        });
+        textureGrass.wrapS = THREE.RepeatWrapping;
+        textureGrass.wrapT = THREE.RepeatWrapping;
+        textureGrass.repeat.set(4, 4);
+        const planeGeometry = new THREE.PlaneGeometry(1000, 200);
+        const planeMaterial = new THREE.MeshLambertMaterial({map: textureGrass});
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.receiveShadow = true;
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.set(15,0,0)
+        scene.add(plane);
+        */
+
+        const loader = new THREE.TextureLoader();
+        loader.load('../../images/ysThree/grass_ground.jpg', function ( textureGrass ) {    // 资源加载完成后的回调函数
+                textureGrass.wrapS = THREE.RepeatWrapping;
+                textureGrass.wrapT = THREE.RepeatWrapping;
+                textureGrass.repeat.set(4, 4);
+                const planeGeometry = new THREE.PlaneGeometry(1000, 200);
+                const planeMaterial = new THREE.MeshLambertMaterial({map: textureGrass});
+                const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+                plane.rotation.x = -0.5 * Math.PI;
+                plane.position.set(15,0,0)
+                plane.receiveShadow = true;
+                scene.add(plane);
+                renderer.render(scene,camera)
+            }
+        );
+
+
+        //添加盒子
+        const geometry = new THREE.BoxGeometry( 5, 5, 5 ); //创建一个box几何体 长宽高
+        const material = new THREE.MeshLambertMaterial( {
+            color:'red',
+            // wireframe:true //以线框形式渲染
+        } );
+        const box = new THREE.Mesh( geometry, material ); //将box几何体放入mesh中
+        box.position.set(-10,5,-30)
+        box.castShadow = true
+        scene.add( box );;
+
+        //添加球体
+        const sphereGeometry = new THREE.SphereGeometry(4, 25, 25);
+        const sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.set(10,5,10)
+        sphere.castShadow = true;
+        scene.add(sphere);
+
+        //添加聚光
+        const spotLight = new THREE.SpotLight(0xcccccc);
+        spotLight.position.set(-40, 60, -10);
+        //spotLight.lookAt(plane);
+        spotLight.castShadow = true
+        scene.add(spotLight);
+
+        //添加平行光
+        const directionalLight = new THREE.DirectionalLight("#ffffff");
+        directionalLight.position.set(30, 10, -50);
+        //directionalLight.target = plane;
+        directionalLight.shadow.camera.near = 0.1;
+        directionalLight.shadow.camera.far = 200;
+        directionalLight.shadow.camera.left = -50;
+        directionalLight.shadow.camera.right = 50;
+        directionalLight.shadow.camera.top = 50;
+        directionalLight.shadow.camera.bottom = -50;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.castShadow = true
+        scene.add(directionalLight);
+
+        //添加半球光
+        /**
+         * HemisphereLight( skyColor, groundColor, intensity )
+         *
+         */
+
+        const hemiLight = new THREE.HemisphereLight(0x0000ff, 0x00ff00, 0.6);
+        hemiLight.position.set(0, 500, 0);
+        scene.add(hemiLight);
+
+
+        //添加控制器
+        const controls = new function () {
+            this.rotationSpeed = 0.05;
+            this.bouncingSpeed = 0.1;
+            this.hemisphere = true;
+            this.groundColor = 0x00ff00;
+            this.skyColor = 0x0000ff;
+            this.intensity = 0.6;
+        };
+        const gui = new dat.GUI();
+        gui.add(controls, 'hemisphere').onChange(function (e) {
+            if (!e) {
+                hemiLight.intensity = 0;
+            } else {
+                hemiLight.intensity = controls.intensity;
+            }
+            // renderer.render(scene,camera)
+        });
+        gui.addColor(controls, 'groundColor').onChange(function (e) {
+            hemiLight.groundColor = new THREE.Color(e);
+        });
+        gui.addColor(controls, 'skyColor').onChange(function (e) {
+            hemiLight.color = new THREE.Color(e);
+            // renderer.render(scene,camera)
+        });
+        gui.add(controls, 'intensity', 0, 5).onChange(function (e) {
+            hemiLight.intensity = e;
+            //renderer.render(scene,camera)
+        });
+
+        function initStats() {
+            const stats = new Stats()
+            stats.setMode(0); // 0: fps, 1: ms
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+            document.body.appendChild(stats.domElement);
+            return stats;
+        }
+        const stats = initStats()
+        let step = 0
+        //动画
+        function animate() {
+            stats.update();
+
+            box.rotation.x += controls.rotationSpeed;
+            box.rotation.y += controls.rotationSpeed;
+            box.rotation.z += controls.rotationSpeed;
+
+            // bounce the sphere up and down
+            step += controls.bouncingSpeed;
+            sphere.position.x = 20 + ( 10 * (Math.cos(step)));
+            sphere.position.y = 2 + ( 10 * Math.abs(Math.sin(step)));
+
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate()
+
+        renderer.shadowMap.enabled = true;
+        renderer.render(scene,camera)
+    })
+
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

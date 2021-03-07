@@ -1,0 +1,36 @@
+.ys-rate{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+}
+.ys-rate-box{
+    position: relative;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    color:#14AE68;
+    margin: 0 1px;
+    cursor: pointer;
+    transition: all .35s;
+    vertical-align: middle;
+}
+.ys-rate-box>i{
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    overflow: hidden;
+    font-size: 20px;
+}
+.ys-rate-box .ys-icon-star-full{
+    display: none;
+}
+.ys-rate-label{
+    display: inline-block;
+    color:#333;
+    margin-left: 10px;
+    height:20px;
+    line-height: 22px;
+    vertical-align: middle;
+}

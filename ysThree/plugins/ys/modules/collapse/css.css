@@ -1,0 +1,60 @@
+.ys-collapse-tit{
+    position: relative;
+    line-height: 30px;
+    padding: 5px 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.ys-collapse-con{
+    display: none;
+    padding: 10px 15px;
+}
+.ys-collapse.ys-on>.ys-collapse-tit,.ys-collapse-tit:hover{
+    color:#14AE68;
+}
+.ys-collapse-tit .ys-icon-right{
+    display: inline-block;
+    transition: all 0.3s;
+    position: absolute;
+    right:10px;
+}
+.ys-collapse.ys-on>.ys-collapse-tit .ys-icon-right{
+    transform: rotateZ(90deg);
+}
+.ys-collapse,.ys-collapses-border .ys-collapse-con{
+    position: relative;
+    border-bottom: 1px solid #ddd;
+}
+.ys-collapses-border .ys-collapse .ys-collapse-tit{
+    border:1px solid #ddd;
+    background-color: #F8F8F8;
+}
+.ys-collapses-border .ys-collapse .ys-collapse-con{
+    border:1px solid #ddd;
+    border-top: none;
+}
+.ys-collapses-border .ys-collapse{
+    border-bottom: none;
+}
+.ys-collapses-border .ys-collapse+.ys-collapse .ys-collapse-tit{
+    border-top: none
+}
+.ys-collapse-icon-left{
+    padding-left: 35px;
+}
+.ys-collapse-icon-left .ys-icon-right{
+    left:5px;
+    right: auto;
+}
+.ys-collapse-btns{
+    position: absolute;
+    right:50px;
+    top:5px;
+    z-index: 22;
+}
+.ys-collapse-btns .ys-btn{
+    opacity: 0.1;
+}
+.ys-collapse-btns .ys-btn:hover{
+    opacity: 1;
+}

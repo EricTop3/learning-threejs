@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>仿鹰眼</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden">
+    <div class="" style="position: absolute;width: 128px;height:128px;border:1px solid #ddd;top:50%;left:50%;margin-left: -64px;margin-top:-64px;box-sizing: border-box"></div>
+</div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">仿鹰眼</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+   ysThree.init({
+       el:document.getElementById('box'),
+       cameraType:1,
+       axes:false,//坐标辅助
+       gridHelper:true,//网格参考线
+       clearColor:'#000'//画布颜色
+   },(scene,camera,renderer)=>{
+       //add light
+       const directionalLight = new THREE.DirectionalLight( 0xffeedd,2 );
+       directionalLight.position.set( 10, 10, 10 ).normalize();
+       scene.add( directionalLight )
+       /*  ***********/
+       const box = new THREE.Mesh(new THREE.BoxGeometry(5,5,5),new THREE.MeshStandardMaterial({color:"red"}))
+       box.position.set(0,3,0)
+       scene.add(box)
+
+       //data
+       const el = document.getElementById('box')
+       const width = el.offsetWidth
+           ,height = el.offsetHeight
+           ,dpr = window.devicePixelRatio
+           ,textureSize = 128 * dpr
+           ,data =  new Uint8Array( textureSize * textureSize * 3 )
+           ,vector = new THREE.Vector2()
+
+
+       //新增相机和场景
+       const cameraOrtho = new THREE.OrthographicCamera( - width / 2, width / 2, height / 2, - height / 2, 1, 10 );
+       cameraOrtho.position.z = 10
+       const sceneOrtho = new THREE.Scene()
+
+
+       //精灵
+       const texture = new THREE.DataTexture( data, textureSize, textureSize, THREE.RGBFormat );
+       texture.minFilter = THREE.NearestFilter;
+       texture.magFilter = THREE.NearestFilter;
+       texture.needsUpdate = true
+
+       const spriteMaterial = new THREE.SpriteMaterial( { map: texture } )
+       const sprite = new THREE.Sprite( spriteMaterial )
+       sprite.scale.set( textureSize, textureSize, 1 ) //大小
+
+       sceneOrtho.add( sprite )
+
+       function updateSpritePosition() {
+           const halfWidth = el.offsetWidth / 2;
+           const halfHeight = el.offsetHeight / 2;
+           const halfImageWidth = textureSize / 2;
+           const halfImageHeight = textureSize / 2;
+           sprite.position.set( - halfWidth + halfImageWidth, halfHeight - halfImageHeight, 1 ) //位置
+
+       }
+       updateSpritePosition()
+
+       renderer.setPixelRatio( window.devicePixelRatio ) //必须
+       renderer.autoClear = false// 必须
+       renderer.render( sceneOrtho, cameraOrtho )
+
+       function onWindowResize() {
+           const width =  el.offsetWidth
+           const height = el.offsetHeight
+           camera.aspect = width / height
+           camera.updateProjectionMatrix()
+           cameraOrtho.left = - width / 2
+           cameraOrtho.right = width / 2
+           cameraOrtho.top = height / 2
+           cameraOrtho.bottom = - height / 2
+           cameraOrtho.updateProjectionMatrix()
+           renderer.setSize( width, height )
+           updateSpritePosition()
+       }
+       window.addEventListener( 'resize', onWindowResize, false )
+       /*  ***********/
+       function initControls() {
+           const  controls = new THREE.OrbitControls(camera, renderer.domElement)
+           controls.enablePan = false
+           return controls
+       }
+       const  controls = initControls()
+       function animate() {
+           requestAnimationFrame(animate)
+
+           controls.update()
+           renderer.clear()
+           renderer.render( scene, camera )
+
+           vector.x = ( el.offsetWidth * dpr / 2 ) - ( textureSize / 2 )
+           vector.y = ( el.offsetHeight * dpr / 2 ) - ( textureSize / 2 )
+           renderer.copyFramebufferToTexture( vector, texture )
+           renderer.clearDepth()
+           renderer.render( sceneOrtho, cameraOrtho )
+       }
+       animate()
+   })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

@@ -1,0 +1,171 @@
+.ys-tab{
+    overflow: hidden;
+    position: relative;
+}
+.ys-tab-head{
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 40px;
+    line-height: 40px;
+    box-sizing: border-box;
+}
+.ys-tab-head:after,.ys-tab-card .ys-tab-tit.ys-on:after,.ys-tab-card-highlight .ys-tab-tit.ys-on:after{
+    position:absolute;
+    content: '';
+    left:0;
+    right:0;
+}
+.ys-tab-head:after{
+    bottom: 1px;
+    height: 1px;
+    background-color: #ddd;
+    z-index: -1;
+}
+.ys-tab-scroll{
+    position: absolute;
+    top:0;
+    left:0;
+    bottom: 0;
+    transition: all 0.5s;
+}
+.ys-tab-tit{
+    position: relative;
+    display: inline-block;
+    padding:0 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+.ys-tab-tit .ys-icon-close-2{
+    display: none;
+    position:absolute;
+    top:0;
+    right:4px;
+    transition: all 0.3s;
+    font-size: 14px;
+    margin-left: 4px;
+}
+.ys-tab-tit:hover,.ys-tab-tit.ys-on,.ys-tab .tab-to-left:hover,.ys-tab .tab-to-right:hover{
+    color:#14AE68;
+}
+.ys-tab-tit:hover .ys-icon-close-2,.ys-tab-tit.ys-on .ys-icon-close-2{
+    display: inline-block;
+}
+.ys-tab-tit .ys-icon-close-2:hover{
+    color:#ff3030
+}
+.ys-tab-con{
+    position: relative;
+    display: none;
+    padding: 10px 15px;
+}
+.ys-tab-con.ys-on{
+    display: block;
+}
+.ys-tab-simple .ys-tab-tit:after{
+    position: absolute;
+    content: '';
+    width:0;
+    left:50%;
+    margin-left: 0;
+    height:3px;
+    border-radius: 3px;
+    background-color:#14AE68;
+    bottom: 0;
+    transition: all 0.3s;
+    z-index: 2;
+}
+.ys-tab-simple .ys-tab-tit.ys-on:after{
+    margin-left: -15px;
+    width: 30px;
+}
+.ys-tab-card .ys-tab-tit.ys-on:after,.ys-tab-card-highlight .ys-tab-tit.ys-on:after{
+    top:0;
+    bottom: 0;
+    border: 1px solid #ddd;
+    border-bottom: 2px solid #fff;
+    pointer-events: none;
+    z-index: 2;
+}
+.ys-tab-card-highlight .ys-tab-head{
+    background-color:#F8F8F8;
+}
+.ys-tab-card-highlight{
+    box-shadow: 0 4px 4px #e0e0e0;
+}
+.ys-tab-card-highlight .ys-tab-head:after{
+    height: 0;
+    background-color: transparent;
+}
+.ys-tab-card-highlight .ys-tab-tit.ys-on{
+    background-color: #fff;
+}
+.ys-tab-card-highlight .ys-tab-tit.ys-on:first-child:after{
+    border-left: none;
+}
+/*垂直*/
+.ys-tab-vertical .ys-tab-head{
+    width: 120px;
+    float: left;
+    height: auto;
+    white-space: normal;
+}
+.ys-tab-vertical-right .ys-tab-head{
+    float: right;
+}
+.ys-tab-vertical .ys-tab-scroll{
+    position: relative;
+    left:auto;
+    top: auto;
+    bottom: auto;
+}
+.ys-tab-vertical .ys-tab-body{
+    overflow: hidden;
+    position: relative;
+}
+.ys-tab-vertical .ys-tab-tit{
+    display: block;
+}
+.ys-tab-vertical .ys-tab-tit .ys-icon-close-2{
+    right:10px;
+}
+.ys-tab-vertical .ys-tab-head:after{
+    right:1px;
+    bottom: 0;
+    width: 1px;
+    background-color: #ddd;
+    height: auto;
+    top:0;
+    left: auto;
+}
+.ys-tab-vertical-right .ys-tab-head:after{
+    left:0;
+}
+.ys-tab-vertical.ys-tab-simple .ys-tab-tit:after{
+    width:3px;
+    left:auto;
+    margin-left: auto;
+    height:0;
+    bottom: auto;
+    right:0;
+}
+.ys-tab-vertical.ys-tab-simple.ys-tab-vertical-right .ys-tab-tit:after{
+    left:0;
+    right:auto;
+}
+.ys-tab-vertical.ys-tab-simple .ys-tab-tit.ys-on:after{
+    top:50%;
+    margin-top: -15px;
+    height:30px;
+}
+.ys-tab .ys-scroll-body{
+    position: relative;
+}
+.ys-tab.horizontal-scroll.ys-have-icons .ys-scroll-body{
+    margin-right:60px;
+}
+.ys-tab .ys-to-icons{
+    background-color: #fff;
+}

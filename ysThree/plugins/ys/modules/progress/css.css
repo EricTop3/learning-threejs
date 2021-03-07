@@ -1,0 +1,31 @@
+.ys-progress{
+    position: relative;
+    background-color: #efefef;
+    height:15px;
+    border-radius:30px;
+}
+.ys-progress-bar{
+    max-width:100%;
+    position: absolute;
+    left:0;
+    height: 100%;
+    border-radius:30px;
+    background-color:#00b2ee;
+    transition:width .35s;
+}
+.ys-progress-bar>span{
+    position: absolute;
+    right:-15px;
+    font-size: 10px;
+}
+.ys-progress-circle{
+    position: relative;
+}
+.ys-progress-circle-tips{
+    position: absolute;
+    left:5px;
+    right:5px;
+    text-align: center;
+    top:50%;
+    transform: translateY(-50%)
+}

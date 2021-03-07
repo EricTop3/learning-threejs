@@ -1,0 +1,61 @@
+.ys-pagination div{
+    display: inline-block;
+    line-height: 30px;
+    vertical-align: middle;
+    user-select: none;
+}
+.ys-pagination .page-total,.ys-pagination  .page-jump{
+    padding: 0 10px;
+    color:#666
+}
+.ys-pagination select{
+    padding: 0 3px;
+    height: 30px;
+    cursor: pointer;
+    transition: 0.3s;
+    color:#666;
+    outline: none;
+    appearance:none;
+    border: solid 1px #ddd;
+}
+.ys-pagination select option{
+    padding: 4px 0;
+}
+.ys-pagination span{
+   display: inline-block;
+    height: 30px;
+    padding:  0 15px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.ys-pagination.have-bg span{
+    background-color: #efefef;
+    border-radius: 3px;
+    margin: 0 4px;
+}
+.ys-pagination input{
+    width: 30px;
+    border: 1px solid #ddd;
+    transition: 0.3s;
+    padding: 0 5px;
+    text-align: center;
+    height:28px;
+}
+.ys-pagination select:hover,.ys-pagination input:hover{
+    border-color:#14AE68
+}
+.ys-pagination span:hover{
+    color:#14AE68
+}
+.ys-pagination span.ys-on,.ys-pagination .jump-btn:hover{
+    background-color:#14AE68;
+    color:#fff
+}
+.ys-pagination .jump-btn{
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+.ys-pagination .page-sizes{
+    margin-right: 10px;
+}

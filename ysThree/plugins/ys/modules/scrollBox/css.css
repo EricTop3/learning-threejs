@@ -1,0 +1,66 @@
+.ys-scroll-box{
+    position: relative;
+    overflow: hidden;
+}
+.ys-scroll-body,.ys-scroll-this{
+    position: absolute;
+    top:0;
+    left:0;
+    bottom: 0;
+}
+.ys-scroll-body{
+    overflow: hidden;
+    right:0;
+}
+.horizontal-scroll.ys-have-icons .ys-scroll-body{
+    left:30px;
+    right:30px;
+}
+.vertical-scroll.ys-have-icons .ys-scroll-body{
+    top:30px;
+    bottom:30px;
+}
+.ys-to-left,.ys-to-right{
+    position: absolute;
+    height:30px;
+    width: 30px;
+    line-height: 30px;
+    z-index: 99;
+    cursor: pointer;
+    text-align: center;
+    color:rgba(20,174,104,0.5);
+    transition: color 0.35s;
+}
+.horizontal-scroll .ys-scroll-this{
+    transition:all 1s;
+}
+.vertical-scroll .ys-scroll-this{
+    bottom: auto;
+    right:0;
+    transition:all .5s ;
+}
+.vertical-scroll .ys-to-left,.vertical-scroll .ys-to-right{
+    top:5px;
+    left:50%;
+    margin-left: -15px;
+    transform: rotateZ(90deg);
+}
+.vertical-scroll .ys-to-right{
+    top:auto;
+    bottom:5px;
+}
+.horizontal-scroll .ys-to-left,.horizontal-scroll .ys-to-right{
+    top:5px;
+    left:0;
+}
+.horizontal-scroll .ys-to-right{
+    left:auto;
+    right:0
+}
+.ys-to-left:hover,.ys-to-right:hover{
+    color:#14AE68;
+    opacity: 1;
+}
+.ys-nowrap{
+    white-space: nowrap;
+}

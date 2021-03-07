@@ -1,0 +1,26 @@
+.ys-message{
+    position:fixed;
+    top:40%;
+    left:0;
+    right:0;
+    text-align: center;
+    z-index: 9999;
+}
+.ys-message>div{
+    display: inline-block;
+    line-height: 28px;
+    padding: 5px 15px;
+    border-radius: 2px;
+    word-break:break-all
+}
+.ys-message .ys-icon-loading-1,.ys-message .ys-icon-loading-2,.ys-message .ys-icon-loading-3{
+    color:#14AE68
+}
+.ys-message .ys-icon-loading-3:before{
+    border-color:#14AE68
+}
+.ys-message p{
+    line-height: 25px;
+    margin-top: 5px;
+    color:#14AE68
+}

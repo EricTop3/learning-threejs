@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>ObjectLoader</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">ObjectLoader</div>
+    <div class="ys-block">
+        此版本说明了 ObjectLoader加载json文件  使用 FileLoader去加载 -- 使用XMLHttpRequest来加载资源的低级类，并由大多数加载器内部使用。 它也可以直接用于加载任何没有对应加载器的文件类型。<br/>
+        对于obj等文件 引入额外的js
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    ysThree.init({
+        el:document.getElementById('box'),
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+        const directionalLight = new THREE.DirectionalLight( 0xffeedd );
+        directionalLight.position.set( 0, 0, 1 ).normalize();
+        scene.add( directionalLight )
+
+        /*  ****************************/
+
+        // const jsonLoader = new THREE.JSONLoader //已经移除
+        const loader = new THREE.ObjectLoader() // A loader for loading a JSON resource ；此加载器内部使用FileLoader进行加载文件。
+        let object = window.localStorage.getItem('teapot_object')
+        if(object){
+            object = loader.parse( JSON.parse(object) )
+            scene.add( object )
+        }else{
+            loader.load("../../data/ysThree/models/json/teapot.json", object =>{
+                object.material.color = new THREE.Color('red')
+                scene.add(object)
+                renderer.render(scene,camera)
+                window.localStorage.setItem("teapot_object",JSON.stringify(object)) //为了用户良好体验 json字符串可以缓存在本地，然后下次直接使用，就不用再重新下载了。
+            })
+        }
+
+        /*  ****************************/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 200;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+
+        function animate() {
+            controls.update()
+            renderer.render(scene,camera)
+            requestAnimationFrame(animate)
+        }
+        animate()
+
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

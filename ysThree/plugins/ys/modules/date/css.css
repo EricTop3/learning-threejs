@@ -1,0 +1,466 @@
+.date-set-ym,.ys-date,.ys-date *,.ys-date-list {
+    box-sizing: border-box
+}
+
+html #yscss-date {
+    display: none;
+    position: absolute;
+    width: 1989px
+}
+
+.ys-date * {
+    margin: 0;
+    padding: 0
+}
+
+.ys-date {
+    position: absolute;
+    z-index: 66666666;
+    margin: 5px 0;
+    border-radius: 2px;
+    font-size: 14px;
+    -webkit-animation-duration: .3s;
+    animation-duration: .3s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-name: date-upbit;
+    animation-name: date-upbit
+}
+
+.ys-date-main {
+    width: 272px
+}
+
+.ys-date-content td,.ys-date-header *,.ys-date-list li {
+    transition-duration: .3s;
+    -webkit-transition-duration: .3s
+}
+
+@-webkit-keyframes date-upbit {
+    from {
+        -webkit-transform: translate3d(0,20px,0);
+        opacity: .3
+    }
+
+    to {
+        -webkit-transform: translate3d(0,0,0);
+        opacity: 1
+    }
+}
+
+@keyframes date-upbit {
+    from {
+        transform: translate3d(0,20px,0);
+        opacity: .3
+    }
+
+    to {
+        transform: translate3d(0,0,0);
+        opacity: 1
+    }
+}
+
+.ys-date-static {
+    position: relative;
+    z-index: 0;
+    display: inline-block;
+    margin: 0;
+    -webkit-animation: none;
+    animation: none
+}
+
+.date-ym-show .date-next-m,.date-ym-show .date-prev-m {
+    display: none!important
+}
+
+.date-ym-show .date-next-y,.date-ym-show .date-prev-y {
+    display: inline-block!important
+}
+
+.date-time-show .date-set-ym span[lay-type=month],.date-time-show .date-set-ym span[lay-type=year],.date-time-show .ys-date-header .ys-icon,.date-ym-show .date-set-ym span[lay-type=month] {
+    display: none!important
+}
+
+.ys-date-header {
+    position: relative;
+    line-height: 30px;
+    padding: 10px 70px 5px
+}
+
+.date-set-ym span,.ys-date-header i {
+    padding: 0 5px;
+    cursor: pointer
+}
+
+.ys-date-header * {
+    display: inline-block;
+    vertical-align: bottom
+}
+
+.ys-date-header i {
+    position: absolute;
+    top: 10px;
+    color: #999;
+}
+.ys-date-header .ys-icon-left-3 {
+    left: 10px
+}
+
+.ys-date-header .ys-icon-left {
+    left: 40px
+}
+
+.ys-date-header .ys-icon-right {
+    right: 10px
+}
+
+.ys-date-header .ys-icon-right-3 {
+    right: 40px
+}
+
+.date-set-ym {
+    width: 100%;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap
+}
+
+.date-time-text {
+    cursor: default!important
+}
+
+.ys-date-content {
+    position: relative;
+    padding: 10px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none
+}
+
+.ys-date-content table {
+    border-collapse: collapse;
+    border-spacing: 0
+}
+
+.ys-date-content td,.ys-date-content th {
+    width: 36px;
+    height: 30px;
+    padding: 5px;
+    text-align: center
+}
+
+.ys-date-content td {
+    position: relative;
+    cursor: pointer
+}
+
+.date-day-mark {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    line-height: 30px;
+    font-size: 12px;
+    overflow: hidden
+}
+
+.date-day-mark::after {
+    position: absolute;
+    content: '';
+    right: 2px;
+    top: 2px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%
+}
+
+.ys-date-footer {
+    position: relative;
+    height: 46px;
+    line-height: 26px;
+    padding: 10px 20px
+}
+
+.ys-date-footer span {
+    margin-right: 15px;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 12px
+}
+
+.ys-date-footer span:hover {
+    color: #3cc47c
+}
+
+.date-footer-btns {
+    position: absolute;
+    right: 10px;
+    top: 10px
+}
+
+.date-footer-btns span {
+    height: 26px;
+    line-height: 26px;
+    margin: 0 0 0 -1px;
+    padding: 0 10px;
+    border: 1px solid #C9C9C9;
+    background-color: #fff;
+    white-space: nowrap;
+    vertical-align: top;
+    border-radius: 2px
+}
+
+.ys-date-list>li,.ys-date-range .ys-date-main {
+    display: inline-block;
+    vertical-align: middle
+}
+
+.ys-date-list {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    background-color: #fff
+}
+
+.ys-date-list>li {
+    position: relative;
+    width: 33.3%;
+    height: 36px;
+    line-height: 36px;
+    margin: 3px 0;
+    text-align: center;
+    cursor: pointer
+}
+
+.date-month-list>li {
+    width: 25%;
+    margin: 17px 0
+}
+
+.date-time-list>li {
+    height: 100%;
+    margin: 0;
+    line-height: normal;
+    cursor: default
+}
+
+.date-time-list p {
+    position: relative;
+    top: -4px;
+    line-height: 29px
+}
+
+.date-time-list ol {
+    height: 181px;
+    overflow: hidden
+}
+
+.date-time-list>li:hover ol {
+    overflow-y: auto
+}
+
+.date-time-list ol li {
+    width: 130%;
+    padding-left: 33px;
+    line-height: 30px;
+    text-align: left;
+    cursor: pointer
+}
+
+.ys-date-hint {
+    position: absolute;
+    top: 115px;
+    left: 50%;
+    width: 250px;
+    margin-left: -125px;
+    line-height: 20px;
+    padding: 15px;
+    text-align: center;
+    font-size: 12px
+}
+
+.ys-date-range {
+    width: 546px
+}
+
+.ys-date-range .date-main-list-0 .date-next-m,.ys-date-range .date-main-list-0 .date-next-y,.ys-date-range .date-main-list-1 .date-prev-m,.ys-date-range .date-main-list-1 .date-prev-y {
+    display: none
+}
+
+.ys-date-range .date-main-list-1 .ys-date-content {
+    border-left: 1px solid #e2e2e2
+}
+
+.ys-date,.ys-date-hint {
+    border: 1px solid #d2d2d2;
+    box-shadow: 0 2px 4px rgba(0,0,0,.12);
+    background-color: #fff;
+    color: #666
+}
+
+.ys-date-header {
+    border-bottom: 1px solid #e2e2e2
+}
+
+.ys-date-header i:hover,.ys-date-header span:hover {
+    color: #3cc47c
+}
+
+.ys-date-content {
+    border-top: none 0;
+    border-bottom: none 0
+}
+
+.ys-date-content th {
+    font-weight: 400;
+    color: #333
+}
+
+.ys-date-content td {
+    color: #666
+}
+
+.ys-date-content td.date-selected {
+    background-color: #62edd6
+}
+
+.date-selected:hover {
+    background-color: #62edd6!important
+}
+
+.ys-date-content td:hover,.ys-date-list li:hover {
+    background-color: #eaeaea;
+    color: #333
+}
+
+.date-time-list li ol {
+    margin: 0;
+    padding: 0;
+    border: 1px solid #e2e2e2;
+    border-left-width: 0
+}
+
+.date-time-list li:first-child ol {
+    border-left-width: 1px
+}
+
+.date-time-list>li:hover {
+    background: 0 0
+}
+
+.ys-date-content .date-day-next,.ys-date-content .date-day-prev {
+    color: #d2d2d2
+}
+
+.date-selected.date-day-next,.date-selected.date-day-prev {
+    background-color: #f8f8f8!important
+}
+
+.ys-date-footer {
+    border-top: 1px solid #e2e2e2
+}
+
+.ys-date-hint {
+    color: #FF5722
+}
+
+.date-day-mark::after {
+    background-color: #3cc47c
+}
+
+.ys-date-content td.ys-this .date-day-mark::after {
+    display: none
+}
+
+.ys-date-footer span[lay-type=date] {
+    color: #3cc47c
+}
+
+.ys-date .ys-this {
+    background-color: #14AE68!important;
+    color: #fff!important
+}
+
+.ys-date .date-disabled,.ys-date .date-disabled:hover {
+    background: 0 0!important;
+    color: #d2d2d2!important;
+    cursor: not-allowed!important;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none
+}
+
+.date-theme-molv {
+    border: none
+}
+
+.date-theme-molv.ys-date-range {
+    width: 548px
+}
+
+.date-theme-molv .ys-date-main {
+    width: 274px
+}
+
+.date-theme-molv .ys-date-header {
+    border: none;
+    background-color: #14AE68
+}
+
+.date-theme-molv .ys-date-header i,.date-theme-molv .ys-date-header span {
+    color: #f6f6f6
+}
+
+.date-theme-molv .ys-date-header i:hover,.date-theme-molv .ys-date-header span:hover {
+    color: #fff
+}
+
+.date-theme-molv .ys-date-content {
+    border: 1px solid #e2e2e2;
+    border-top: none;
+    border-bottom: none
+}
+
+.date-theme-molv .date-main-list-1 .ys-date-content {
+    border-left: none
+}
+
+.date-theme-grid .date-month-list>li,.date-theme-grid .date-year-list>li,.date-theme-grid .ys-date-content td,.date-theme-grid .ys-date-content thead,.date-theme-molv .ys-date-footer {
+    border: 1px solid #e2e2e2
+}
+
+.date-theme-grid .date-selected,.date-theme-grid .date-selected:hover {
+    background-color: #f2f2f2!important;
+    color: #14AE68!important
+}
+
+.date-theme-grid .date-selected.date-day-next,.date-theme-grid .date-selected.date-day-prev {
+    color: #d2d2d2!important
+}
+
+.date-theme-grid .date-month-list,.date-theme-grid .date-year-list {
+    margin: 1px 0 0 1px
+}
+
+.date-theme-grid .date-month-list>li,.date-theme-grid .date-year-list>li {
+    margin: 0 -1px -1px 0
+}
+
+.date-theme-grid .date-year-list>li {
+    height: 43px;
+    line-height: 43px
+}
+
+.date-theme-grid .date-month-list>li {
+    height: 71px;
+    line-height: 71px
+}
+.ys-icon.ys-date-icon{
+    font-size: 28px;
+    margin: 0 10px;
+}

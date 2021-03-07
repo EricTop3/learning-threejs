@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>group使用</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">group使用</div>
+    <div class="ys-block">
+        先看官方释义：<br/>
+        它与Object3D相同。它的目的是使处理对象组在语法上更清晰。然后再看Object3D释义:<br/>
+        这是three.js中大多数对象的基类，提供了一组属性和方法来处理3D空间中的对象。
+        请注意，这可以通过.add(object)方法将对象作为子对象添加，但最好使用Group来进行分组<br/>
+        总结：Group和Object3D差不多 都可以通过.add(object)方法将对象作为子对象;但最好使用Group<br/>
+        Group:可以将多个对象组成一个对象便于操作；我们知道物体的自转都是绕其中心点，那如果想要绕其他点转动怎么办呢？就可以使用group<br/>
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+   ysThree.init({
+       el:document.getElementById('box'),
+       cameraType:1,
+       axes:true,//坐标辅助
+       clearColor:'#000'//画布颜色
+   },(scene,camera,renderer)=>{
+       //添加点击事件
+       /*
+       const el = document.getElementById('box')
+       el.addEventListener('click',function (e) {
+           const objList = ysThree.onMouse(el,e)
+           if (objList.length !== 0 && objList[0].obj instanceof THREE.Mesh) {
+               const obj = intersects[0].obj
+               alert(obj.id+";"+obj.name)
+           } else {
+                alert("未选中 Mesh!");
+           }
+       })
+       */
+       new THREE.BoxGeometry(5,5,5)
+       const box1 = new THREE.Mesh(  new THREE.BoxGeometry(5,5,5),new THREE.MeshBasicMaterial({color:'red'}))
+       const box2 = new THREE.Mesh(  new THREE.BoxGeometry(5,5,5),new THREE.MeshBasicMaterial({color:'yellow'}))
+       box1.position.set(-5,0,0)
+       box2.position.set(5,0,0)
+       const group = new THREE.Group()
+       group.add(box1)
+       group.add(box2)
+       scene.add(group)
+       camera.position.set(0,10,30)
+       camera.lookAt(new THREE.Vector3(0,0,0))
+
+       //顺便 提一下merge 合并 merge合并相对group性能要好些。去merge后可被射线识别，group需要设置射线设置true后遍历子对象才识别
+       box1.updateMatrix();
+       box2.updateMatrix();//这个用来把合并前的变换矩阵带进geometry保证对象合并后正确的变换
+       const  boxGeo = new THREE.Geometry()
+       boxGeo.merge(box1.geometry,box1.matrix);
+       boxGeo.merge(box2.geometry,box2.matrix)
+       const mergeBox = new THREE.Mesh(boxGeo,new THREE.MeshBasicMaterial({ color: 'green'}))
+       mergeBox.position.y = 3
+       scene.add(mergeBox)
+
+
+       function animate() {
+           group.rotateY(0.01*Math.PI)
+           mergeBox.rotateZ(0.01*Math.PI)
+           requestAnimationFrame(animate)
+           renderer.render(scene,camera)
+       }
+       animate()
+
+
+       //这个时候就需要主要了 scene.children没有box(mesh)了 而是 group
+      // console.log(scene.children);
+
+       //遍历对象 相比于直接使用Object3D.children，traverse会递归遍历所有子孙
+       group.traverse(function (e) {
+           if (e instanceof THREE.Mesh) {
+               e.rotation.x += 0.01;
+               e.rotation.y += 0.01;
+               e.rotation.z += 0.01;
+           }
+       })
+   })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

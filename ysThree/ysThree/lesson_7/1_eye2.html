@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>仿鹰眼</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden">
+
+</div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">仿鹰眼</div>
+    <div class="ys-block">
+        单场景
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+   ysThree.init({
+       el:document.getElementById('box'),
+       cameraType:1,
+       axes:false,//坐标辅助
+       gridHelper:true,//网格参考线
+       clearColor:'#000'//画布颜色
+   },(scene,camera,renderer)=>{
+
+       renderer.setPixelRatio( window.devicePixelRatio )
+
+       //add light
+       const directionalLight = new THREE.DirectionalLight( 0xffeedd,2 );
+       directionalLight.position.set( 10, 10, 10 ).normalize();
+       scene.add( directionalLight )
+       /*  ***********/
+       const box = new THREE.Mesh(new THREE.BoxGeometry(5,5,5),new THREE.MeshStandardMaterial({color:"red"}))
+       box.position.set(0,3,0)
+       scene.add(box)
+
+
+       /** main */
+       let width = el.offsetWidth
+           ,height =  el.offsetHeight
+           ,insetWidth = height / 4 //这里为高度使其成为正方行
+           ,insetHeight = height / 4
+
+       const camera2 = new THREE.PerspectiveCamera( 45, 1, 1, 10000 );
+       camera2.position.copy( camera.position )
+
+
+
+       function onWindowResize() {
+           // one camera
+           width =  el.offsetWidth
+           height = el.offsetHeight
+           camera.aspect = width / height
+           camera.updateProjectionMatrix()
+
+           renderer.setSize( el.offsetWidth, el.offsetHeight )
+
+           // two camera
+           insetWidth = height / 4 //这里为高度使其成为正方行
+           insetHeight = height / 4
+           camera2.aspect = insetWidth / insetHeight
+           camera2.updateProjectionMatrix()
+
+           //not set the other
+           // renderer.setSize(  insetWidth, insetHeight )
+       }
+       window.addEventListener( 'resize', onWindowResize, false )
+       /*  ***********/
+       function initControls() {
+           const  controls = new THREE.OrbitControls(camera, renderer.domElement)
+           controls.enablePan = false
+           return controls
+       }
+       const  controls = initControls()
+       function animate() {
+           requestAnimationFrame(animate)
+           controls.update()
+
+
+           // render the one
+           renderer.setViewport( 0, 0, el.offsetWidth,  el.offsetHeight )
+           renderer.render( scene, camera )
+
+
+           // render the two
+           renderer.clearDepth() // important!
+
+           renderer.setScissorTest( true )
+           renderer.setScissor( 20, el.offsetHeight - insetHeight - 20, insetWidth, insetHeight )
+
+           renderer.setViewport( 20, el.offsetHeight - insetHeight - 20, insetWidth, insetHeight ) // 20 为靠边边距
+           camera2.position.copy( camera.position )
+           camera2.quaternion.copy( camera.quaternion )
+           renderer.render( scene, camera2 )
+
+           renderer.setScissorTest( false )
+
+       }
+
+
+       animate()
+
+       /** main */
+   })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>thick line</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">thick line</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src='../../plugins/threeLibrary/js/lines/LineSegmentsGeometry.js'></script>
+<script src='../../plugins/threeLibrary/js/lines/LineGeometry.js'></script>
+<script src='../../plugins/threeLibrary/js/lines/WireframeGeometry2.js'></script>
+<script src='../../plugins/threeLibrary/js/lines/LineMaterial.js'></script>
+<script src='../../plugins/threeLibrary/js/lines/LineSegments2.js'></script>
+<script src='../../plugins/threeLibrary/js/lines/Line2.js'></script>
+<script src='../../plugins/threeLibrary/js/lines/Wireframe.js'></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+    const el = document.getElementById('box')
+    const app = new YsThree(el,{
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+
+    const camera = app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls()
+    const clock = new THREE.Clock()
+    // app.initStatus(Stats)
+
+    /*  ****     main   ******/
+    /* 添加内置线条*/
+    function addNormalLine() {
+        const p1 =  new THREE.Vector3(0,0,0)
+        const p2 =  new THREE.Vector3(3,3,3)
+        const lineGeo = new THREE.Geometry()
+        lineGeo.vertices.push(p1,p2)
+        lineGeo.colors.push(new THREE.Color("red"),new THREE.Color("yellow"))
+        const line = new  THREE.Line(lineGeo,new THREE.LineBasicMaterial({
+            linewidth:10,//window无效
+            vertexColors: true,//使用顶点渐变着色
+        }))
+        scene.add(line)
+        return line
+    }
+    addNormalLine()
+
+    /* 使用额外引入的js*/
+    function addExportLine() {
+        const position = [
+            0,0,0, //对应一个向量 的 x,y,z
+            -1,1,-1,
+            -2,3,-4
+        ]
+        const color = [
+            255,255,255, //对应一个color的 r g b
+            255,0,0,
+            255,0,255
+        ]
+        const geometry = new THREE.LineGeometry()
+        geometry.setPositions( position )
+        geometry.setColors( color )
+
+        const  matLine = new THREE.LineMaterial( {
+            linewidth: 5, // px
+            vertexColors: THREE.VertexColors,
+            dashed: false
+        });
+        matLine.resolution.set( el.offsetWidth, el.offsetHeight ); // 必须的 不然无限大
+        const  line = new THREE.Line2( geometry, matLine );
+        line.computeLineDistances();
+        //line.scale.set( 1, 1, 1 );
+        scene.add( line )
+        return line
+    }
+    addExportLine()
+    /*  ******   main        *****/
+    function render() {
+        controls.update(clock.getDelta())
+        renderer.render( scene,camera)
+        // TWEEN.update()
+        // app.staus.update()
+        requestAnimationFrame(render)
+    }
+    render()
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

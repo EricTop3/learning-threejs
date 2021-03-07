@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>标题</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+    <style>
+        pre{
+            font-size: 14px;
+            line-height: 25px;
+        }
+        pre code{
+            margin: 10px 0;
+            display: block;
+            background-color:#2B2B2B ;
+            color:#A4C14F;
+        }
+        .ys-collapse{
+            margin:0 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="">
+     <div class="ys-tit">
+         question and answer
+     </div>
+    <div class="ys-collapses ys-collapses-border" ys-siblings-effect="true">
+        <div class="ys-collapse">
+            <div class="ys-collapse-tit"><span>clone 和 copy 的区别</span></div>
+            <div class="ys-collapse-con">
+         <pre>
+         three中Object3D对象(如mesh group等)和 Geometry都可可clone和copy 但结果却不一样
+         首先 克隆是重新创建一个对象，返回一个新对象
+         而 复制 是 一个对象导入另一个对象
+         简单说一般 copy是深拷贝，克隆共用一个几何体对象的顶点；因此object对象克隆出来的平移等不会影像，但放大(scale)则都放大。
+         </pre>
+            </div>
+        </div>
+        <div class="ys-collapse">
+            <div class="ys-collapse-tit"><span>three中Box3是什么？ 有什么作用？</span></div>
+            <div class="ys-collapse-con">
+         <pre>
+         首先它不是几何对象，并不是你想的那样 scene.add(new THREE.Box3(1,1,1)) (滑稽)
+         它是一个包围盒（类似还有：包围矩形Box2，包围球Sphere），用它可以判断一个物体的中心，边界等
+         <code>
+             通常对于一个 mesh 获取中心点
+             const box = new THREE.Mesh(boxGeo,material)
+             const box_box3 = new THREE.Box3()
+
+             box_box3.setFromPoints(boxGeo.vertices) //设置包围盒的最大最小值 .setFromPoints()封装了一个方法.computeBoundingBox() ；执行.computeBoundingBox()方法才会计算该几何体的包围盒Box3，然后赋值给.boundingBox属性。
+             box_box3.getCenter() // 获取中心点
+
+             //因此你也可以这么写 (常用写法)
+             box.geometry.computeBoundingBox() //先计算 不计算的话，默认为null
+             box.boundingBox.getCenter() //再获取
+
+             //对于group 你可以
+             new THREE.Box3().setFromObject( group ).getCenter() //新版three中 很多方法都需要塞入一个参数 如 const v = new THREE.Vector3() ; XX.getCenter(v) ;v 就是想要的值。
+             也可以
+             new THREE.Box3().expandByObject(group).getCenter() // 计算层级模型group包围盒
+
+             //当然还有其他方法可见官方文档。
+         </code>
+         </pre>
+            </div>
+        </div>
+        <div class="ys-collapse">
+            <div class="ys-collapse-tit"><span>如何理解Geometry和BufferGeometry及二者区别</span></div>
+            <div class="ys-collapse-con">
+         <pre>
+         在Three.js中几何体对象Geometry和缓冲类型几何体对象BufferGeometry本质上就是对WebGL中各种顶点数据的封装，
+         顶点颜色数据就是顶点数据中的一种，至于Three.js中的各种点材质、线材质、网格材质、精灵材质本质上都是对顶点着色器、片元着色器、uniform变量数据的封装。
+
+         材质对象Material颜色属性.color的属性值直接影响的是原生WebGL中的片元着色器进行计算后赋值给内置变量gl_FragColor,如果是几何体中的顶点颜色数据需要先在顶点着色器中进行插值计算，然后传递给片元着色器。
+
+         设置模型的几何体顶点颜色时候，对于Geometry几何体，如果是点Points或线Line模型，可以直接设置几何体对象的.colors属性，如果是网格模型Mesh，需要通过三角形属性.faces来设置顶点颜色,Face3.color或Face3.vertexColors。
+         对于BufferGeometry几何体而言，直接设置attributes.color属性就可以，一般加载的外部模型都是BufferGeometry几何体。
+
+         至于二者有什么不同，你至少要对几何体的顶点数据要有一定概念，比如顶点位置、顶点法向量、顶点颜色、顶点纹理坐标UV等数据
+
+         无论是缓冲类型几何体对象BufferGeometry还是普通几何体对象Geometry，它们本质上都是用来描述一个几何体顶点数据的对象，通过不用的属性来表示不同的顶点数据，这些构造函数也封装了一些相关方法
+
+         Three.js渲染器在解析几何体对象的时候，如果几何体对象是普通几何体对象Geometry，Three.js的WebGL渲染器会把普通几何体对象Geometry转化为缓冲类型几何体对象BufferGeometry，然后再提取 BufferGeometry包含的顶点信息
+
+         因此程序中 如果使用了大量了Geometry影响了fps等，使体验较差，那么就使用BufferGeometry试试。
+
+         总之Geometry 是对 BufferGeometry 的用户有好替代。Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes（如顶点位置，面信息，颜色等）比起 BufferGeometry 更容易读写，但是运行效率不如有类型的队列。
+         对于大型工程或正式工程，推荐采用 BufferGeometry。
+
+         两者的使用我会在代码示例中有所阐述。
+         </pre>
+            </div>
+        </div>
+        <div class="ys-collapse">
+            <div class="ys-collapse-tit"><span>position和getWorldPosition有什么区别？</span></div>
+            <div class="ys-collapse-con">
+         <pre>
+         通过网格模型Mesh的属性.position获得的是网格模型的本地坐标;   .getWorldPosition是世界座标。两个差异是什么？
+         <code>
+        const box = new THREE.Mesh(new THREE.BoxBufferGeometry(2,2,2),new THREE.MeshBasicMaterial({color:'red'}))
+        scene.add(box)
+        const group = new THREE.Group() //默认是 （0，0，0）
+        box.position.set(2,0,0)
+        group.position.set(2,0,0) //
+        group.add(box)
+        scene.add(group)
+        scene.updateMatrixWorld(true)
+        console.log("box_position:"+JSON.stringify(box.position))
+        console.log("group_position:"+JSON.stringify(group.position))
+
+        const worldP1 = new THREE.Vector3()
+        box.getWorldPosition(worldP1)
+        console.log("box_worldP1:"+JSON.stringify(worldP1))
+
+        const worldP2 = new THREE.Vector3()
+        group.getWorldPosition(worldP2)
+        console.log("group_worldP2:"+JSON.stringify(worldP2)) //group的世界位置变了 是group本地和box本地相加。
+        /*
+        * 如果不更新模型世界矩阵，通过.getWorldPosition()方法获得世界坐标和局部坐标是一样的，
+        * 执行scene.updateMatrixWorld(true);可以把从根对象scene到网格模型Mesh中间所有网格模型Mesh父对象的变换体现出来。
+        *  */
+         </code>
+         </pre>
+            </div>
+        </div>
+        <div class="ys-collapse">
+            <div class="ys-collapse-tit"><span>Fog和FogExp2区别?</span></div>
+            <div class="ys-collapse-con">
+         <pre>
+          Fog : 这个类中的参数定义了线性雾。也就是说，雾的密度是随着距离线性增大的。 即场景中物体雾化效果随着随距离线性变化。
+          Fog( color : Integer, near : Float, far : Float )
+          如：scene.fog = new THREE.Fog('red', 1, 1000)
+
+          FogExp2类定义的是指数雾。也就是说，雾的密度是随着距离指数增大的。
+          FogExp2( color : Integer, density : Float ) //参数2表示雾的密度将会增长多快
+          如：scene.fog = new THREE.FogExp2('red',0.001)
+
+          FogExp2和Fog的雾化算法不同，都具有颜色属性.color，FogExp2没有.near和.far属性，直接设置.density属性就可以
+         </pre>
+            </div>
+        </div>
+        <div class="ys-collapse">
+            <div class="ys-collapse-tit"><span>删除一个网格对象/模型是不是remove掉就行了?</span></div>
+            <div class="ys-collapse-con">
+         <pre>
+          通常，从肉眼上看上去 scene.remove(object) 是没毛病
+          但你也需要将 object.geometry.dispose() 、object.material.dispose()、甚至texture.dispose()去释放内存防止内存外溢
+          仅仅执行scene.remove(object)只是把网格、模型从场景对象的.children属性中删除，解析网格模型Mesh几何体的顶点数据通过WebGL API创建的顶点缓冲区占用的内存并不会释放。
+         </pre>
+            </div>
+        </div>
+        <div class="ys-collapse">
+            <div class="ys-collapse-tit"><span>Line、LineLoop、LineSegments区别?</span></div>
+            <div class="ys-collapse-con">
+         <pre>
+          LineLoop、LineSegments 和 Line几何是相同的，他们都是物体线的。
+
+          LineSegments在渲染时使用的是gl.LINES 它会将我们传递的一系列点自动分配成两个为一组 然后将分配好的两个点连接，这种先天实际项目中主要用于绘制具有相同开始点，结束点不同的线条，比如常用到的遗传图
+
+          LineLoop在渲染的时候使用的是gl.LINE_LOOP 它绘制一条直线到下一个顶点，并将最后一个顶点连回第一个顶点。
+          其实这也可以通过 geo.vertices.push( geo.vertices[ 0 ].clone() )来实现首位相接
+
+         </pre>
+            </div>
+        </div>
+        <div class="ys-collapse">
+            <div class="ys-collapse-tit"><span>depthTest、depthWrite、colorWrite是做啥的?</span></div>
+            <div class="ys-collapse-con">
+         <pre>
+          depthTest：深度测试属性在示例中有介绍，相信你看到了 当为false的时候不会被物体遮挡这是一个特性。
+
+          depthWrite：深度写入属性
+          渲染此材质的时候，是否对深度缓冲区有任何的影响. 默认 true.
+          在绘制2D叠加时，为了将多个在一起的事物分层而不创建z-index伪像，禁用深度写入会很有用。
+
+          colorWrite：是否渲染材质的颜色. 该属性可以和网格模型Mesh的渲染顺序属性renderOrder结合使用来创建遮挡其它对象的不可见对象. 默认true.
+         </pre>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

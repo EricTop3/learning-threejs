@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>base</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">base</div>
+    <div class="ys-block">
+        本节内容主要将基础的数学几何及常用算法
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/ColladaLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/lines/MeshLine.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+        renderer.setPixelRatio( window.devicePixelRatio )
+        //add light
+        const directionalLight = new THREE.DirectionalLight( '#fff' )
+        directionalLight.position.set( 30, 30, 30 ).normalize()
+        scene.add( directionalLight )
+        const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+        scene.add(ambientLight)
+
+        /*  ***********/
+
+        /** 向量
+         *  Vector3
+         *  add(v):相加
+         *  divideScalar(s):除以标量,比如s=2 可以获取其中点
+         *  distanceTo(v):计算该向量到所传入的v间的距离。
+         *  divide(v):将该向量除以向量v
+         *  还有很多好用的就不讲解了 请看官方文档吧如 .setFromSphericalCoords
+         *
+         *  */
+        function testVector3() {
+            const v1 = new THREE.Vector3(2, 2, 2)
+            const v2 = new THREE.Vector3(10, 10, 10)
+
+            // 也可以通过 divideScalar　获取两点之间 中点
+            const v3 = v1.clone().add(v2.clone()) //将两个向量相加
+            console.log(v3.divideScalar(2))  // 将该向量除以标量 2 。可以获取其中点。
+        }
+        testVector3()
+
+        /**
+         * Line3 线段Line3
+         * at(number,v) //获取线段位置 number:0-1 0表示起点 1表示终点
+         * closestPointToPoint //计算线段上一个点到某一个点的最近一点
+         * distanceSq () //直线距离
+         * getCenter //获取中点
+         *
+         * */
+        function testLine3() {
+            // 创建一个线段对象Line3
+            const v1 = new THREE.Vector3(2, 2, 2)
+            const v2 = new THREE.Vector3(10, 10, 10)
+            const line3 = new THREE.Line3(v1,v2)
+            //或者：
+            // line3.start = v1;// 线段起点坐标
+            // line3.end = v2;// 线段终点坐标
+            //取线段中点(或者说取两点之间中点)
+            const center = new THREE.Vector3()
+            line3.getCenter(center)
+            console.log(center)
+
+            //直线就离
+            console.log(line3.distanceSq());
+        }
+        testLine3()
+
+        /**
+         * 射线Ray
+         * .intersectTriangle(p1,p2,p3) 判断射线和一个三角形区域是否相交,如果相交返回交点坐标，不相交返回null。
+         * .intersectsBox(Box3)方法判断射线和一个包围盒Box3是否相交
+         * .intersectsSphere(Sphere)方法判断射线和一个包围球Sphere是否相交...
+         *
+         * plane
+         * .distanceToPoint(point) 计算点到平面的垂线距离。
+         * .distanceToSphere(Sphere) 返回球面 sphere 的边缘到平面的最短距离。
+         *
+         * */
+
+         //略
+
+        /**
+         * 三角形Triangle
+         * .getMidpoint()获取重心点
+         * .getArea() //获取面积
+         * .getNormal()计算三角形法线方向
+         * */
+
+        function testTriangle () {
+            const triangle = new THREE.Triangle(new THREE.Vector3(0, 0, 0),new THREE.Vector3(0, 1, 0),new THREE.Vector3(0, 1, 1))
+            const area = triangle.getArea() //计算一个三角形区域的面积
+            // 如果你想计算一个网格模型的表面，就可以遍历网格模型对应几何体所有的三角形区域计算面积然后累加。
+            console.log(area)
+        }
+        testTriangle()
+
+        renderer.shadowMap.enabled = true
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 1000;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+        const clock= new THREE.Clock()
+        function animate() {
+            controls.update(clock.getDelta())
+            renderer.render(scene,camera)
+            requestAnimationFrame(animate)
+
+
+        }
+        animate()
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

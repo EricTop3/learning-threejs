@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>粒子</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <style>
+        .container{
+            position: absolute;
+            top:0;
+            left:0;
+            right:0;
+            bottom: 0;
+            overflow: auto;
+        }
+        .box{
+            position: relative;
+            height:800px;
+            overflow: hidden;
+            margin: 10px 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="container">
+    <div class="box" id="box1"></div>
+    <div class="box" id="box2"></div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/dat.gui.min.js"></script>
+<script>
+    function init(el,callback) {
+        const container = el,
+            width = container.width(),
+            height = container.height()
+        //场景
+        const scene = new THREE.Scene();  // 场景
+        scene.fog = new THREE.Fog(0xaaaaaa, 0.010, 200);
+        //相机
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        camera.position.set(0,15,100)
+        camera.lookAt(scene.position);
+
+        //渲染器
+        const renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+        renderer.setClearColor('#000');
+
+        //坐标轴辅助
+        const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+        scene.add(axes);
+
+        callback(scene,camera,renderer)
+
+    }
+    init($("#box1"),(scene,camera,renderer)=> {
+        const material = new THREE.SpriteMaterial(); //前面说了 精灵是二维的，想要三维需要使用点云 老版本three是pointCloud 现版本叫points了
+        for (let x = -5; x < 5; x++) {
+            for (let y = -5; y < 5; y++) {
+                let sprite = new THREE.Sprite(material);
+                sprite.position.set(x * 10, y * 10, 0);
+                scene.add(sprite);
+            }
+        }
+        renderer.render(scene, camera)
+    })
+    init($("#box2"),(scene,camera,renderer)=> {
+        const range = 100; // 雪花出现范围
+        // 雪花纹理
+        new THREE.TextureLoader().load('../../images/ysThree/snow.png',function (texture) {  //精灵（二维） 、点云（三维）//pointCloud points
+            const material = new THREE.PointsMaterial({
+                size: 2,
+                map: texture, // 纹理
+                transparent: true, // 透明
+                opacity: 1, // 透明度
+                //depthTest: false, // 可以去掉texture的黑色背景
+                blending: THREE.AdditiveBlending // 融合模式
+            });
+            material.map.repeat = new THREE.Vector2(1, 1);
+            //通过自定义几何体设置粒子位置
+            const geom = new THREE.Geometry();
+            for (let i = 0; i < 200; i++) {
+                const v = new THREE.Vector3(
+                    Math.random() * range - range/2,
+                    Math.random() * range - range/2,
+                    Math.random() * range - range/2
+                );
+                v.velocityY = 0.1 + Math.random() / 5; // speed
+                v.velocityX = (Math.random() - 0.5) / 3;
+                v.velocityZ = (Math.random() - 0.5) / 3;
+                geom.vertices.push(v); // vertices --顶点
+            }
+            // 点云
+            const clouds = [];
+            const points = new THREE.Points(geom,material);
+            clouds.push(points)
+            scene.add(points);
+            renderer.render(scene, camera)
+
+            function animate () {
+                clouds.forEach(points=> {
+                    const vertices = points.geometry.vertices;
+                    vertices.forEach(v =>{
+                        // 计算位置
+                        v.y = v.y - (v.velocityY);
+                        v.x = v.x - (v.velocityX);
+                        v.z = v.z - (v.velocityZ);
+
+                        // 边界检查
+                        if (v.y <= -range/2) v.y = range / 2;
+                        if (v.x <= -range/2 || v.x >= range/2) v.x = v.x * -1;
+                        if (v.z <= -range/2 || v.z >= range/2) v.velocityZ = v.velocityZ * -1;
+                    });
+                    points.geometry.verticesNeedUpdate = true; //重要：渲染时需要更新位置（如果没有设为true,则无法显示动画）
+                });
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+            animate()
+
+            //绕点飞行
+            const O = [0,0],R = 80
+            let  a = 0,x   =  O[0] +  R   *   Math.cos(a),
+                z = O[1] +  R * Math.sin(a)
+            function animate2() {
+                a = a + 0.01
+                x =  O[0] + R * Math.cos(a)
+                z = O[1] + R * Math.sin(a)
+                camera.position.set(x,30,z)
+                camera.lookAt(new THREE.Vector3(0,0,0))
+                requestAnimationFrame( animate2 )
+                renderer.render(scene, camera)
+            }
+            animate2()
+        })
+    })
+</script>
+</html>

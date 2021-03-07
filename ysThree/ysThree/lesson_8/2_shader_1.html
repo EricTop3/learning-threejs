@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>纹理叠加</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">纹理叠加</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/ColladaLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/lines/MeshLine.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        // gridHelper:true,//网格参考线
+       //  axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+
+        renderer.setPixelRatio( window.devicePixelRatio )
+
+        //add light
+        const directionalLight = new THREE.DirectionalLight( '#fff' )
+        directionalLight.position.set( 30, 30, 30 ).normalize()
+        scene.add( directionalLight )
+        const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+        scene.add(ambientLight)
+
+        /*  ***********/
+        const loader = new THREE.TextureLoader()
+        let uniforms
+        const Gradient = {
+            vs:`
+    varying vec2 vUv;
+    void main(){
+    vUv = uv;
+    gl_Position = projectionMatrix*viewMatrix*modelMatrix*vec4( position, 1.0 );
+  }
+    `,
+            fs:` //过度切换
+  uniform sampler2D texture1;
+  uniform sampler2D texture2;
+  uniform float time;     // 变化时间
+  varying vec2 vUv;
+  void main() {
+    vec4 color1 = texture2D( texture1, vUv);
+    vec4 color2 = texture2D( texture2, vUv);
+    gl_FragColor = mix(color1, color2, abs(sin(time))); // 使用内置的 mix() 函数做两张图的线性插值渐变效果
+  }
+    `,
+            fs2: `//横向I切换
+  uniform sampler2D texture1;
+  uniform sampler2D texture2;
+  uniform float time;     // 变化时间
+  varying vec2 vUv;
+  void main() {
+     float m = smoothstep(0.0, 0.0, vUv.x - abs(sin(time))*1.5);
+     gl_FragColor = mix(texture2D(texture1, (vUv - 0.5) * (1.0 - m) + 0.5), texture2D(texture2, (vUv - 0.5) * m + 0.5), m);
+  }`,
+            fs3: ` //放大过度切换
+  precision mediump float;
+  uniform sampler2D texture1;
+  uniform sampler2D texture2;
+  uniform float time;     // 变化时间
+  varying vec2 vUv;
+
+  void main() {
+        vec2 st = vUv;
+        st -= .5;
+        st *= 1.-smoothstep(0., 1., abs(sin(time)));
+        st += .5;
+        gl_FragColor =  mix(texture2D(texture1, vUv), texture2D(texture2, vUv), abs(sin(time)));
+  }`,
+
+     }
+        loader.load("../../images/ysCesium/huaji_1.png",texture1 =>{
+            loader.load("../../images/ysCesium/huaji_2.png",texture2 =>{
+                uniforms =  {
+                    texture1: {
+                        value: texture1
+                    },
+                    texture2: {
+                        value: texture2
+                    },
+                    time: {
+                        value: 0
+                    }
+                }
+
+                const  material = new THREE.ShaderMaterial({
+                    uniforms: uniforms,
+                    vertexShader:Gradient.vs ,
+                    fragmentShader:Gradient.fs3, // fs，fs2，fs3
+                    side:THREE.DoubleSide,
+                    transparent:true
+                });
+
+                const plane = new THREE.Mesh(new THREE.PlaneGeometry(5,5),material)
+                plane.rotateX( -Math.PI/2)
+                scene.add(plane)
+            })
+        })
+
+
+
+
+
+        renderer.shadowMap.enabled = true
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 1000;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+        const clock= new THREE.Clock()
+        function animate() {
+            if(uniforms) uniforms.time.value = uniforms.time.value + 0.005
+            controls.update(clock.getDelta())
+            renderer.render(scene,camera)
+            requestAnimationFrame(animate)
+        }
+        animate()
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>凹凸贴图和法相贴图纹理</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="container ys-absolute-container" id="container" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">凹凸贴图和法相贴图纹理</div>
+    <div class="ys-block">
+       1：凹凸贴图可以使纹理也有厚度，看起来更立体。凹凸贴图一般使用一张灰度图，设置成材料的bumpMap属性
+        <br/>
+       2：法向贴图使用一张法向图来表示纹理图片某个点的法向量。即用一张图片保存另一张图片的法向量信息，
+        然后再在threejs中将这两个图片的信息合在一起，就形成了一个细节丰富的立体纹理
+        设置材质的 normalMap 属性
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/dat.gui.min.js"></script>
+<script>
+    function init(el,callback) {
+        const container = el,
+            width = container.width(),
+            height = container.height()
+        //场景
+        const scene = new THREE.Scene();  // 场景
+        scene.fog = new THREE.Fog(0xaaaaaa, 0.010, 200);
+        //相机
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        camera.position.set(0,30,50)
+        camera.lookAt(scene.position);
+
+        //渲染器
+        const renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+        renderer.setClearColor('#000');
+
+        //坐标轴辅助
+        const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+        scene.add(axes);
+
+        callback(scene,camera,renderer)
+
+    }
+    init($("#container"),(scene,camera,renderer)=> {
+        let rotate =  true
+        //添加灯光
+        function addLight(){
+            const ambientLight = new THREE.AmbientLight('#fff',0.1)
+            scene.add(ambientLight)
+
+            const light = new THREE.SpotLight();
+            light.position.set(0, 30, 30);
+            light.intensity = 1;
+            scene.add(light);
+            light.castShadow = true
+        }
+        addLight()
+
+        //添加平面
+        function addPlane(){
+            //平面
+            const planeGeometry = new THREE.PlaneGeometry(60, 20);
+            const planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            //水平面旋转并且设置位置
+            plane.rotation.x = -0.5 * Math.PI;
+            plane.position.set(0,-1,0)
+            scene.add(plane);
+            plane.receiveShadow = true;
+        }
+        addPlane()
+        /* ********** 演示 **/
+        /**
+         * 凹凸贴图可以使纹理也有厚度，看起来更立体。凹凸贴图一般使用一张灰度图，设置成材料的bumpMap属性
+         * */
+        const gui = new dat.GUI();
+        const loader = new THREE.TextureLoader()
+         loader.load("../../images/ysThree/stone.jpg",texture =>{
+            loader.load("../../images/ysThree/stone-bump.jpg",bumpTexture =>{
+                const boxGeo = new THREE.BoxGeometry(20,20,2)
+                const material = new THREE.MeshStandardMaterial({map:texture,bumpMap:bumpTexture,bumpScale:1});
+                const box = new THREE.Mesh(boxGeo,material)
+                box.position.set(-15,10,0)
+                scene.add(box)
+                box.castShadow = true
+                renderer.render(scene, camera)
+
+                const controls = new function () {
+                    this.bumpScale = 1;
+                };
+                gui.add(controls, 'bumpScale', 0, 2).onChange(function (e) {
+                    material.bumpScale = e
+                    renderer.render(scene, camera)
+                })
+            })
+        })
+        /**
+         * 法向贴图使用一张法向图来表示纹理图片某个点的法向量。即用一张图片保存另一张图片的法向量信息，
+         * 然后再在threejs中将这两个图片的信息合在一起，就形成了一个细节丰富的立体纹理
+         * 设置材质的 normalMap 属性
+         *
+         * */
+        loader.load("../../images/ysThree/normal2.jpg",texture =>{
+            loader.load("../../images/ysThree/normal1.jpg",bumpTexture =>{
+                const boxGeo = new THREE.BoxGeometry(20,20,2)
+                const material = new THREE.MeshStandardMaterial({map:texture,normalMap:bumpTexture});
+                material.normalScale.set(1, 1)
+                const box = new THREE.Mesh(boxGeo,material)
+                box.position.set(15,10,0)
+                scene.add(box)
+                box.castShadow = true
+                renderer.render(scene, camera)
+
+                const controls = new function () {
+                    this.normalScale = 1;
+                    this.rotate = rotate
+                };
+                gui.add(controls, 'normalScale', 0, 2).onChange(function (e) {
+                    material.normalScale.set(e, e)
+                    renderer.render(scene, camera)
+                })
+                gui.add(controls,'rotate').onChange(function (e) {
+                    rotate = e
+                })
+            })
+        })
+
+        /* ******** 演示 **/
+        renderer.shadowMap.enabled = true;
+        renderer.render(scene, camera)
+
+        //环视
+        const O = [0,0],R = 50
+        let  a = 0.5*Math.PI,x   =  O[0] +  R   *   Math.cos(a),
+            z = O[1] +  R * Math.sin(a)
+        function animate() {
+            if(rotate){
+                a = a + 0.005
+                x =  O[0] + R * Math.cos(a)
+                z = O[1] + R * Math.sin(a)
+                camera.position.set(x,30,z)
+                camera.lookAt(new THREE.Vector3(0,0,0))
+            }
+            requestAnimationFrame( animate )
+            renderer.render(scene, camera)
+        }
+        setTimeout(()=>{
+           animate()
+        },3000)
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

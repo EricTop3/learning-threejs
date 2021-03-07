@@ -1,0 +1,100 @@
+.index-top{
+    position: absolute;
+    height:60px;
+    line-height: 60px;
+    left:0;
+    top:0;
+    right:0;
+    background-color: #dfdfdf;
+    box-shadow: 0 0 10px #696969;
+    z-index: 33;
+}
+.logo{
+    font-size: 22px;
+    color:#1E9FFF;
+    background:url("../../images/logo.png") no-repeat left center;
+    background-size:30px 40px;
+    padding-left: 40px;
+    margin-left: 30px;
+    height: 60px;
+    line-height: 60px;
+    display: inline-block;
+}
+.index-left{
+    position: absolute;
+    top:60px;
+    left:0;
+    bottom: 0;
+    width: 200px;
+    overflow: auto;
+    padding: 15px 0 50px 0;
+    background-color: #efefef;
+    box-shadow: 0 0 10px #696969;
+    box-sizing: border-box;
+    z-index: 22;
+}
+.index-right{
+    position: absolute;
+    top:70px;
+    left:210px;
+    bottom:10px;
+    right:0;
+    overflow: hidden;
+    background-color: #fff;
+    z-index: 11;
+}
+.screen-btn{
+    position: fixed;
+    right:30px;
+    bottom: 30px;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.35s;
+    z-index: 999;
+}
+.screen-btn:hover{
+    color:#1E9FFF;
+}
+.left-tit{
+    font-size: 18px;
+    font-weight:600;
+    padding-left: 9px;
+}
+.index-left .routers a{
+    display: block;
+    font-size: 14px;
+    line-height: 28px;
+    margin: 10px 0;
+}
+.index-left .routers a:hover,.index-left .routers a.on{
+    color:#1E9FFF;
+}
+.router-tit{
+    font-size: 12px;
+    color:#888888;
+}
+.info a{
+    font-size: 16px;
+    display: block;
+    line-height: 30px;
+}
+.over-line{
+    font-size: 12px;
+    color:#888;
+    margin-top: 15px;
+    padding-left: 10px;
+}
+.ys-slideNav>.ys-nav-item>.ys-nav-item-tit{
+    background-color: transparent;
+}
+.ys-slideNav>.ys-nav-item>.ys-nav-item-tit:hover{
+    color:#14AE68!important;
+}
+.ys-slideNav>.ys-nav-item>.ys-nav-item-tit:hover+i{
+    color:#14AE68!important;
+}
+.ys-nav-item .ys-nav-item{
+    padding-left: 10px;
+    font-size: 13px;
+}

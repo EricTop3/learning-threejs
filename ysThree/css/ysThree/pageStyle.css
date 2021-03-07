@@ -1,0 +1,45 @@
+.ys-tit-sm{
+    font-weight: bold;
+}
+.ys-block{
+    padding: 10px 10px;
+}
+.tips-container{
+    left:-100%;
+    width: 100%;
+    right:auto;
+    overflow: auto;
+    background-color:#fff;
+    line-height: 26px;
+    z-index: 9998;
+}
+.fix-btns{
+    position: fixed;
+    z-index: 9999;
+    top:60px;
+    left:10px;
+}
+.ys-tit{
+    font-size: 20px;
+    line-height: 100px;
+    text-align: center;
+    font-weight: bold;
+}
+.obj-label{
+    padding:5px 10px;
+    position:absolute;
+    background-color:rgba(255,255,255,0.8);
+    color:#000;
+    border:1px solid red;
+}
+.tips-container-show{
+    animation: show 0.3s forwards;
+}
+@keyframes show {
+    from{
+        left:-100%
+    }
+    to{
+        left:0
+    }
+}

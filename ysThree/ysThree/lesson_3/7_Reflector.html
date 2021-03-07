@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>镜子</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">镜子</div>
+    <div class="ys-block">
+        THREE中类似境面反射可以使用CubeCamera+环境贴图envMap 但是它更适用于创建物体自身对环境的反射，<br/>
+
+        如果想要创建一面镜子的话使用CubeCamera会难调试所反射物体的位置，而且镜面中的物体不会随着控制器的缩放而变动。
+        使用Reflector.js可以很容易的创建一面镜子，并且镜子中的对象会依据发光体的缩放而缩放，而且可以调试镜子的发光色，类似墨镜的效果。
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/objects/Reflector.js"></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+    const el = document.getElementById('box')
+
+    const app = new YsThree(el,{
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+
+    const camera = app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls()
+
+    const directionalLight = new THREE.DirectionalLight( '#fff' )
+    directionalLight.position.set( 30, 30, 30 ).normalize()
+    scene.add( directionalLight )
+    const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+    scene.add(ambientLight)
+
+    const box = new THREE.Mesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshLambertMaterial({color:"red"}))
+    box.position.set(0,4,-5)
+    scene.add(box)
+
+    /*  ***********/
+    //镜子一
+    const geometry = new THREE.PlaneBufferGeometry( 30, 30 );
+    const groundMirror = new THREE.Reflector( geometry, {
+        clipBias: 0.003,
+        textureWidth: el.offsetWidth * window.devicePixelRatio,
+        textureHeight: el.offsetHeight  * window.devicePixelRatio,
+        color: 'green',
+        recursion: 1,
+    } );
+    groundMirror.position.y = 1;
+    groundMirror.rotateX(  Math.PI );
+    scene.add( groundMirror );
+
+    //镜子二
+    const geometry2 = new THREE.CircleBufferGeometry( 20, 20 );
+    const groundMirror2 = new THREE.Reflector( geometry2, {
+        clipBias: 0.003,
+        textureWidth: el.offsetWidth * window.devicePixelRatio,
+        textureHeight: el.offsetHeight * window.devicePixelRatio,
+        color: 'yellow',
+        recursion: 1
+    } );
+    groundMirror2.position.y = 0.5;
+    groundMirror2.rotateX( - Math.PI / 2 );
+    scene.add( groundMirror2 );
+
+
+    camera.position.set(5,15,-35)
+    /*  ***********/
+    function animate() {
+        controls.update()
+        renderer.render(scene,camera)
+
+        box.rotation.x += 0.02;
+        box.rotation.y += 0.02;
+        box.rotation.z += 0.02;
+
+        requestAnimationFrame(animate)
+    }
+    animate()
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

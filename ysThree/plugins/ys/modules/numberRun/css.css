@@ -1,0 +1,31 @@
+.ys-numberRun{
+    display: inline-block;
+    height: 50px;
+    line-height: 50px;
+    overflow: hidden;
+}
+.ys-numberRun>div{
+    position: relative;
+    float: left;
+    width: 30px;
+    overflow: hidden;
+    margin: 0 2px;
+    color:#00b2ee;
+    font-size: 20px;
+    font-weight: bold;
+    /*transition:transform 500ms ease-out;*/
+}
+.ys-numberRun>div>span{
+    display: block;
+    height: 50px;
+    background: url("../../images/num.png") no-repeat center center;
+    background-size: 100% 100%;
+    text-align: center;
+}
+.ys-numberRun>div.dot-li{
+    width: 10px;
+}
+.ys-numberRun>div.dot-li>span{
+    background: none;
+    line-height: 70px;
+}

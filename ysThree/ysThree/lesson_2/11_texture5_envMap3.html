@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>环境贴图(3)</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="container ys-absolute-container" id="container" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+    <span class="ys-btn ys-btn-warm ys-btn-sm  VR-btn">切换双屏</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">环境贴图(3)</div>
+    <div class="ys-block">
+        下图是使用 盒子来贴图的。
+        立方体模拟四周， CubeTextureLoader加载六个方向图片,
+        此外我们这里再天添加双屏 模拟VR
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/effects/StereoEffect.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/dat.gui.min.js"></script>
+<script>
+    function init(el,callback) {
+        const container = el,
+            width = container.width(),
+            height = container.height()
+        //场景
+        const scene = new THREE.Scene();  // 场景
+        scene.fog = new THREE.Fog(0xaaaaaa, 0.010, 200);
+        //相机
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        camera.lookAt(scene.position);
+
+        //渲染器
+        const renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+        renderer.setClearColor('#000');
+
+        //坐标轴辅助
+        const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+        scene.add(axes);
+
+        callback(scene,camera,renderer)
+
+    }
+    init($("#container"),(scene,camera,renderer)=> {
+        let rotate =  true
+        //添加灯光
+        function addLight(){
+            const light = new THREE.SpotLight();
+            light.position.set(0, 30, 30);
+            light.intensity = 2;
+            scene.add(light);
+            light.castShadow = true
+        }
+        addLight()
+        /* ********** 演示 **/
+        // const texture  = new THREE.CubeTextureLoader()
+        //     .setPath( '../images/ysThree/allScene/' )
+        //     .load( [
+        //         'px.jpg',//右(-1,0,0)
+        //         'nx.jpg',//左(1,0,0)
+        //         'py.jpg',//上(0,1,0)
+        //         'ny.jpg',//下(0,-1,0)
+        //         'pz.jpg',//前(0,0,1)
+        //         'nz.jpg'//后(0,0,-1)
+        //     ],function () {
+        //         renderer.render(scene, camera);
+        //     });
+        // scene.background = texture
+
+        //模拟周围
+        const texture = new THREE.CubeTextureLoader()
+            .setPath( '../../images/ysThree/allScene/' )
+            .load( [
+                'px.jpg',//右(-1,0,0)
+                'nx.jpg',//左(1,0,0)
+                'py.jpg',//上(0,1,0)
+                'ny.jpg',//下(0,-1,0)
+                'pz.jpg',//前(0,0,1)
+                'nz.jpg'//后(0,0,-1)
+            ] );
+        texture.format = THREE.RGBFormat;
+        texture.mapping = THREE.CubeReflectionMapping;
+
+        const shader = THREE.ShaderLib["cube"];
+        // shader.uniforms["tCube"].value = texture; //老版本
+        const material = new THREE.ShaderMaterial({
+            fragmentShader: shader.fragmentShader,
+            vertexShader: shader.vertexShader,
+            uniforms: shader.uniforms,
+            // depthWrite: false,
+            side: THREE.DoubleSide
+        });
+        material.envMap = texture; //新版本
+        let skyBox = new THREE.Mesh(new THREE.BoxGeometry(800, 800, 800), material);
+        scene.add(skyBox);
+
+        //相机
+        scene.remove(camera) //移出透视相机 添加全景相机
+        const cubeCamera = new THREE.CubeCamera(0.1, 10000, 1080);
+        scene.add(cubeCamera);
+        camera.position.set(0,0,60)
+        camera.lookAt(new THREE.Vector3(0,30,0))
+
+        //盒子
+        function addBall(){
+            const geometry =  new THREE.BoxGeometry( 10, 10, 10 );
+            const material = new THREE.MeshBasicMaterial( { envMap: texture, side: THREE.DoubleSide } );
+            const ball = new THREE.Mesh(geometry,material)
+            ball.position.set(0,0,0)
+            scene.add(ball)
+        }
+        addBall()
+        /* ******** 演示 **/
+        renderer.shadowMap.enabled = true;
+        renderer.render(scene, camera)
+
+        //窗口变动触发的函数
+        $(window).resize(function () {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            reRender()
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        })
+
+        function initControls() {
+
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 200;
+            //是否开启右键拖拽
+            controls.enablePan = true
+
+            return controls
+        }
+        const  controls = initControls()
+        /*
+         *切换双屏
+         * */
+        let VR = false
+        const VrRender = new THREE.StereoEffect(renderer);
+        function reRender() {
+            if(VR){
+                VrRender.render(scene, camera)
+            }else{
+                const size = renderer.getSize();
+                renderer.setViewport(0, 0, size.width, size.height);
+                renderer.render(scene, camera);
+            }
+        }
+        function aninate() {
+            controls.update()
+            requestAnimationFrame(aninate)
+            reRender()
+        }
+        aninate()
+
+        $(".VR-btn").click(function(){
+            VR = !VR
+            reRender()
+        })
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

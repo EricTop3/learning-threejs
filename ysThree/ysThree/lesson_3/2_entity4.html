@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>css2d/css3d</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+    <style>
+        .box1{
+            position: absolute;
+            padding: 10px 15px;
+            background-color: rgba(0,0,0,0.8);
+            color:#fff;
+            border:1px solid #3cc47c;
+        }
+        .box2{
+            position: absolute;
+            color:#fff;
+            background-color: rgba(0, 127, 127, 0.447);
+            box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
+            border: 1px solid rgba(127,255,255,0.25);
+        }
+        .box2 .ys-con{
+            font-weight: bold;
+            color: rgba(255,255,255,0.75);
+            text-shadow: 0 0 10px rgba(0,255,255,0.95);
+        }
+    </style>
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">css2d/css3d</div>
+    <div class="ys-block">
+         THREE 提供了 CSS2DRenderer / CSS3DRenderer  让我们方便的去使用html元素
+    </div>
+</div>
+<div style="display: none">
+    <div class="box1" id="box1">
+        这是一个文本
+    </div>
+    <div class="box2" id="box2">
+        <div class="ys-block">
+            <div class="ys-tit-sm"><span>标题</span></div>
+            <div class="ys-con">
+                这是一个精彩的文本
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/renderers/CSS2DRenderer.js"></script>
+<script src="../../plugins/threeLibrary/js/renderers/CSS3DRenderer.js"></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+    const el = document.getElementById('box')
+
+    const app = new YsThree(el,{
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+
+    const camera = app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls()
+    const clock = new THREE.Clock()
+   // app.initStatus(Stats)
+
+    renderer.setPixelRatio( window.devicePixelRatio )
+
+    //add light
+    const directionalLight = new THREE.DirectionalLight( '#fff' )
+    directionalLight.position.set( 30, 30, 30 ).normalize()
+    scene.add( directionalLight )
+    const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+    scene.add(ambientLight)
+
+
+    /*  ***********/
+    //创建一个 2d  -- 其大小不会随镜头改变而改变
+    const css2DRenderer = new THREE.CSS2DRenderer()
+    css2DRenderer.setSize( el.offsetWidth, el.offsetHeight )
+    const label2d = new THREE.CSS2DObject( document.getElementById("box1") )
+    label2d.position.set(0,1,0)
+    scene.add(label2d) // 或者 box.add(label2d)
+    css2DRenderer.domElement.style.position = 'absolute'
+    css2DRenderer.domElement.style.top = 0
+    css2DRenderer.domElement.style.pointerEvents = "none"
+    $("#box").append(css2DRenderer.domElement)
+
+    //创建一个 3d  -- 其大小会随镜头改变而改变
+    const css3DRenderer = new THREE.CSS3DRenderer()
+    css3DRenderer.setSize( el.offsetWidth, el.offsetHeight )
+    const label3d = new THREE.CSS3DObject( document.getElementById("box2") )
+    label3d.position.set(0,0,0)
+    scene.add( label3d )
+    label3d.scale.set(0.05,0.05,0.05) //我们可以通过控制box的大小来控制label3d的大小
+    css3DRenderer.domElement.style.position = 'absolute'
+    css3DRenderer.domElement.style.top = 0
+    css3DRenderer.domElement.style.pointerEvents = "none"
+    $("#box").append(css3DRenderer.domElement)
+
+    $(window).resize(function () {
+        css2DRenderer.setSize( el.offsetWidth, el.offsetHeight )
+        css3DRenderer.setSize( el.offsetWidth, el.offsetHeight )
+    })
+
+
+    /*  ***********/
+
+    function render() {
+        controls.update(clock.getDelta())
+        renderer.render( scene,camera)
+        // TWEEN.update()
+        // app.staus.update()
+        requestAnimationFrame(render)
+
+        //
+        css2DRenderer.render( scene, camera )
+        css3DRenderer.render( scene, camera )
+
+    }
+    render()
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

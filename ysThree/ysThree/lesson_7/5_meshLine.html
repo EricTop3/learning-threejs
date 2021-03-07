@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>标题</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">标题</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/lines/MeshLine.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+
+        renderer.setPixelRatio( window.devicePixelRatio )
+
+        //add light
+        const directionalLight = new THREE.DirectionalLight( '#fff' )
+        directionalLight.position.set( 30, 30, 30 ).normalize()
+        scene.add( directionalLight )
+        const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+        scene.add(ambientLight)
+
+        /*  ***********/
+        const resolution = new THREE.Vector2( el.offsetWidth,  el.offsetHeight );
+        const geo = new THREE.Geometry()
+        for( let j = 0; j <  2 * Math.PI - .1; j +=  2 * Math.PI / 100 ) {
+            let v = new THREE.Vector3();
+            v.set( Math.cos( j )*10, Math.sin( j )*10, 0 );
+            geo.vertices.push( v );
+        }
+        // const v1 = new THREE.Vector3(0,1,0)
+        // const v2 = new  THREE.Vector3(10,1,0)
+        //geo.vertices.push(v1,v2)
+        // //geo.vertices.push( geo.vertices[ 0 ].clone() ); //将线闭合 也可以使用 普通的lin可以使用 LineLoop 实现 收尾想接
+        let  line
+        new THREE.TextureLoader().load( '../../images/ysThree/red_line.png', function( texture ) {
+            const  meshLine = new MeshLine()
+            meshLine.setGeometry(geo)
+            line = new THREE.Mesh(meshLine.geometry,new MeshLineMaterial({
+                color:"red",
+                map: texture,
+                useMap: true,
+                lineWidth:4,
+                resolution: resolution,
+                dashArray:0.5,  // 破折号之间的长度和间距。(0 -无破折号)
+                dashRatio:0.8, // 定义可见和不可见之间的比率(0 -更可见，1 -更不可见)。
+                dashOffset:0,
+                transparent: true,
+                sizeAttenuation: 1, //使线宽不变，不管距离(1个单位是屏幕上的1px)(0 -衰减，1 -不衰减)
+                side: THREE.FrontSide,
+                depthTest: true,
+                blending: THREE.AdditiveBlending,
+                near: camera.near,
+                far: camera.far,
+            }))
+            line.rotateX(Math.PI/2)
+            line.position.y = 2
+            scene.add(line)
+
+        })
+
+
+
+        //管道线：
+        const list =  [
+            [-20,5,-10],
+            [10,5,-9],
+            [10,5,20],
+            [40,5,40]
+        ]
+        //获取线 geo
+        const getLineGeo = list =>{
+            const l = []
+            for(let i =0;i<list.length;i++){
+                l.push( new THREE.Vector3(list[i][0],list[i][1],list[i][2]));
+            }
+            const curve = new THREE.CatmullRomCurve3(l) //曲线路径
+            const points = curve.getPoints(50) //曲线分五十段，也就是取 51个点
+
+            const geometry = new THREE.Geometry()//创建一个几何 存储这些定点
+            for(let i =0;i < points.length;i++){
+                geometry.vertices.push( new THREE.Vector3(points[i].x,points[i].y,points[i].z))
+            }
+
+            return {
+                curve,
+                geometry,
+                points
+            }
+        }
+
+        const res  =  getLineGeo(list)
+
+        //管道体
+        const tubeGeometry = new THREE.TubeGeometry(res.curve, 1000, 0.1, 30)
+        const texture = new THREE.TextureLoader().load("../../images/ysThree/red_line.png")
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping; //每个都重复
+        texture.repeat.set(1, 1);
+        const tubeMesh = new THREE.Mesh(tubeGeometry , new THREE.MeshBasicMaterial({map:texture,side:THREE.BackSide,transparent:true}))
+        texture.needsUpdate = true
+        scene.add(tubeMesh)
+
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            //controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 200;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+
+        function animate() {
+            controls.update()
+            renderer.render(scene,camera)
+
+            requestAnimationFrame(animate)
+            if(line){
+                line.material.uniforms.dashOffset.value -= 0.01
+            }
+            texture.offset.x -= 0.01
+        }
+        animate()
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

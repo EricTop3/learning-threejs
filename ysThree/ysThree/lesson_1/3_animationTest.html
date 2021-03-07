@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>动画测试</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <style>
+        .container{
+            position: absolute;
+            top:0;
+            left:0;
+            right:0;
+            bottom: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="container"></div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script>
+    //随机颜色
+    const randomColor = ()=> `rgb(${parseInt(Math.random()*256)},${parseInt(Math.random()*256)},${parseInt(Math.random()*256)})`
+
+    const container = $("#container"),
+        width = container.width(),
+        height = container.height()
+
+    //场景
+    const scene = new THREE.Scene();  // 场景
+
+    //相机
+    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+    camera.position.set(0,100,150)
+    camera.lookAt(scene.position);
+
+    //渲染器
+    const renderer = new THREE.WebGLRenderer({
+        antialias : true
+    });
+    renderer.setSize(width, height);
+    container.append(renderer.domElement);
+    renderer.setClearColor('#000');
+
+    function initStats() {
+        const stats = new Stats()
+        stats.setMode(0); // 0: fps, 1: ms
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.left = '0px';
+        stats.domElement.style.top = '0px';
+        document.body.appendChild(stats.domElement);
+        return stats;
+    }
+    const stats = initStats()
+    //坐标轴辅助
+    const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+    scene.add(axes);
+
+    //添加灯光
+    var pointLight = new THREE.PointLight( 0xffffff, 2, 0);
+    pointLight.position.set( 0, 70, 10 );
+    scene.add( pointLight );
+    //灯光辅助
+    var sphereSize = 1;
+    var pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
+    scene.add( pointLightHelper )
+
+
+    //地面
+    const planeGeometry = new THREE.PlaneGeometry(150, 150);
+    const planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    //水平面旋转并且设置位置
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.set(0,0,0)
+    scene.add(plane);
+
+
+    //添加球体
+    function addSphere (){
+        const sphereGeometry = new THREE.SphereGeometry(2, 20, 20); // 20为切割数量 --实际并非球体而是一定量的切割面
+        const sphere = new THREE.Mesh(sphereGeometry, new THREE.MeshLambertMaterial({color: randomColor()}));
+        //设置球体位置
+        sphere.position.x = Math.random()*100-50;
+        sphere.position.y = Math.random()*100;
+        sphere.number = parseInt(sphere.position.y/5) //粗略根据初始高度决定弹几次
+        sphere.position.z = Math.random()*100-50;
+        scene.add(sphere);
+        //球体是具有阴影
+        sphere.castShadow = true;
+        return  sphere
+    }
+
+    const sphereList = []
+    for(let i = 0;i<100;i++){
+        const  sphere = addSphere ()
+        sphere.v = 0;
+        sphere.a = -0.01;
+        sphere.isMoving = true
+        sphereList.push( sphere )
+    }
+    //告诉渲染器，我们需要阴影映射
+    renderer.shadowMap.enabled = true;
+    //平面是接受阴影
+    plane.receiveShadow = true;
+    //需要给光源同样设置具有阴影
+    pointLight.castShadow = true;
+
+    function renderScene() {
+        /* *** */
+        sphereList.forEach(e =>{
+            go (e)
+        })
+        /* *** */
+        requestAnimationFrame(renderScene);
+        renderer.render(scene, camera);
+        stats.update();
+    }
+
+    function go (e){
+        if (e.isMoving) {
+            e.position.y += e.v;
+            e.v += e.a;
+            if (e.position.y <= 2) {
+                e.v = -e.v * 0.9;
+                e.number = e.number-1
+            }
+            if (e.number <= 0) {
+                e.isMoving = false;
+                e.position.y = 2;
+                // scene.remove(e); //移除
+            }
+        }
+    }
+    renderScene()
+</script>
+</html>

@@ -1,0 +1,58 @@
+/*依赖于dropDown*/
+.ys-headerNav{
+    padding: 0 10px;
+}
+.ys-headerNav a{
+    color:#000;
+}
+.ys-bg-black .ys-dropdown-title *,.ys-bg-red .ys-dropdown-title *,.ys-bg-orange .ys-dropdown-title *,.ys-bg-blue .ys-dropdown-title *{
+    color:#fff;
+}
+.ys-headerNav .ys-dropdown:after{
+    position: absolute;
+    content: '';
+    width:0;
+    bottom: 0;
+    left:0;
+    height: 4px;
+    background-color:#14AE68;
+    transition: all 0.2s;
+}
+.ys-headerNav .ys-dropdown.ys-on .ys-dropdown-title *{
+    /*color:#14AE68;*/
+}
+.ys-headerNav .ys-dropdown.ys-on:after{
+    width:100%;
+}
+.ys-headerNav .ys-dropdown-title{
+    height: 60px;
+    line-height: 60px;
+}
+.ys-dropdown-title img{
+    margin-right: 10px;
+    border-radius: 100%;
+}
+/*按钮组导航*/
+.ys-headerNav-icons{
+    padding: 6px 10px;
+}
+.ys-headerNav-icons a{
+    display: inline-block;
+    color:#fff;
+    padding: 5px 10px;
+    text-align: center;
+    border-radius: 3px;
+}
+.ys-headerNav-icons a>.ys-nav-label{
+    padding: 5px 0;
+}
+.ys-headerNav-icons a.ys-on,.ys-headerNav-icons a:hover{
+    color:#14AE68;
+    background-color: rgba(255,255,255,0.5);
+}
+.ys-headerNav-icons a>.ys-nav-icon>img:last-child,.ys-headerNav-icons a.ys-on>.ys-nav-icon>img:first-child,.ys-headerNav-icons a:hover>.ys-nav-icon>img:first-child{
+    display: none;
+}
+.ys-headerNav-icons a>.ys-nav-icon>img:first-child,.ys-headerNav-icons a.ys-on>.ys-nav-icon>img:last-child,.ys-headerNav-icons a:hover>.ys-nav-icon>img:last-child{
+    display: inline-block;
+}

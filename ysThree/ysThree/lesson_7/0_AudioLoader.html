@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>音频</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+    <span class="ys-btn ys-btn-warm ys-btn-sm  video-btn1">普通音频</span>
+    <span class="ys-btn ys-btn-warm ys-btn-sm  video-btn2">位置音频</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">音频</div>
+    <div class="ys-block">
+        1：非位置音频THREE.Audio
+        2：位置音频THREE.PositionalAudio
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/ColladaLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/lines/MeshLine.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+        renderer.setPixelRatio( window.devicePixelRatio )
+        renderer.shadowMap.enabled = true
+
+        //add light
+        const directionalLight = new THREE.DirectionalLight( '#fff' )
+        directionalLight.position.set( 30, 30, 30 ).normalize()
+        scene.add( directionalLight )
+        const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+        scene.add(ambientLight)
+
+        /*  ***********/
+        const loading = ys.message({type:'loading','msg':'正在加载音频'})
+        function addAudio() {
+            const  listener = new THREE.AudioListener();
+            // camera.add( listener )
+            // 创建一个非位置音频对象  用来控制播放
+            const audio = new THREE.Audio(listener);
+            // 创建一个音频加载器对象
+            const audioLoader = new THREE.AudioLoader();
+            // 加载音频文件，返回一个音频缓冲区对象作为回调函数参数
+            audioLoader.load('../../data/ysThree/video/qyc.mp3', AudioBuffer => {
+                // console.log(AudioBuffer)
+                // 音频缓冲区对象关联到音频对象audio
+                audio.setBuffer(AudioBuffer);
+                audio.setLoop(true); //是否循环
+                audio.setVolume(0.5); //音量
+                // 播放缓冲区中的音频数据
+               // audio.play(); //play播放、stop停止、pause暂停
+            })
+            return audio
+        }
+
+        function addPositionAudio() {
+            // 用来定位音源的网格模型
+            const audioBox = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshBasicMaterial({color:'red'}))
+            audioBox.rotateX(Math.PI/2)
+            audioBox.position.set(0, 0, 0); // 设置网格模型的位置，相当于设置音源的位置
+            scene.add(audioBox)
+
+            const listener = new THREE.AudioListener()
+            // 监听者绑定到相机对象
+            camera.add(listener);
+            // 创建一个位置音频对象,监听者作为参数,音频和监听者关联。
+            const posAudio = new THREE.PositionalAudio(listener);
+            //音源绑定到一个网格模型上
+            audioBox.add(posAudio);
+            // 创建一个音频加载器
+            const audioLoader = new THREE.AudioLoader();
+            // 加载音频文件，返回一个音频缓冲区对象作为回调函数参数
+            audioLoader.load('../../data/ysThree/video/with.mp3', AudioBuffer => {
+
+                // 音频缓冲区对象关联到音频对象audio
+                posAudio.setBuffer(AudioBuffer);
+                posAudio.setVolume(0.9); //音量
+                posAudio.setRefDistance(150); //参数值越大,声音越大
+                //posAudio.play(); //播放
+
+                loading.remove()
+            });
+
+            return posAudio
+        }
+        const audio = addAudio()
+        const positionAudio  = addPositionAudio()
+        $(".video-btn1").click(() => {
+
+            if(audio) audio.play() //play播放、stop停止、pause暂停
+
+            if(positionAudio && positionAudio.isPlaying) positionAudio.stop()
+        })
+
+        $(".video-btn2").click(() => {
+
+            if(audio && audio.isPlaying ) audio.stop()
+
+            if(positionAudio) positionAudio.play()
+        })
+
+
+
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 1000;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+        const clock= new THREE.Clock()
+        function animate() {
+            controls.update(clock.getDelta())
+            renderer.render(scene,camera)
+            requestAnimationFrame(animate)
+        }
+        animate()
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

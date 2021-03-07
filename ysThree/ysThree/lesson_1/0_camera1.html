@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>相机</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+    <span class="ys-btn ys-btn-sm change-camera">切换成正交相机</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">相机介绍</div>
+    <div class="ys-block">
+        <p>常见的相机有两类：透视相机 和 正交相机</p>
+        <p>1;透视相机：成像有近大远小的感觉,最接近自然的视图</p>
+        <p>2:正交相机：没有近大远小的感觉，类似工程制图,所有事物渲染一样大，开发二维游戏时常用这种</p>
+        <p>此外还有</p>
+        <p>3:CubeCamera（立方体相机或全景相机）:全景相机就是可以360度拍摄的相机，在threeJs中，全景相机构造也类似，使用六个不同方向上的相机同时拍摄，将拍摄的结果融合到同一个画面中。
+        ( near, far, cubeResolution ) ，near -- 观察者到视景体的最近的裁剪面的距离，far -- 观察者到视景体的最远的裁剪面的距离，cubeResolution -- 设置立方体的宽度</p>
+        <p>4:StereoCamera（3D相机），它是用两个不同位置的透视相机同时拍摄，将拍摄的结果合成为一个画面。这便是早期3D电影的表现方法，通过让人的两只眼睛看到稍微不同的图像，来欺骗人的感觉，让人好像看到了立体一样。</p>
+    </div>
+    <div class="ys-block">
+        <div class="ys-tit-sm"><span>three中的坐标系</span></div>
+        <img src="../../images/ysThree/xyz.jpg" height="100%">
+    </div>
+    <div class="ys-block">
+        <div class="ys-tit-sm"><span>三维坐标系一般分两种：左手和右手坐标系(两者区别在Z的朝向不同，three采用的是右手)</span></div>
+        <img src="../../images/ysThree/xyz2.jpg" height="100%">
+    </div>
+    <div class="ys-block clearfix">
+        <div class="ys-col-md6">
+            <div class="ys-tit-sm"><span>透视相机</span></div>
+            <img src="../../images/ysThree/camera.png" width="100%">
+        </div>
+        <div class="ys-col-md6">
+            <div class="ys-tit-sm"><span>正交相机</span></div>
+            <img src="../../images/ysThree/camera2.jpg" width="100%">
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script>
+    const container = $("#box"),
+        width = container.width(),
+        height = container.height();
+
+    /*场景*/
+    const scene = new THREE.Scene()
+
+    /*一：透视相机*/
+    /**
+     * 视角 ： 45度
+     * 宽高比 ： window.innerWidth / window.innerHeight
+     * 近平面距离 ： 1
+     * 远平面距离 ： 1000
+     */
+    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); //视角 宽高比 近平面距离
+    //相机位置
+    // camera.position.x = 10;
+    // camera.position.y = 10;
+    // camera.position.z = 10;
+    // camera.up.x = 0;
+    // camera.up.y = 0;
+    // camera.up.z = 0;
+    // camera.lookAt(0,0,0);//x,y,z
+    camera.position.set(10,10,10); // 相机的位置
+    camera.lookAt(0,0,0); // 相机看着的方向
+
+
+    /*二：正交相机*/
+    /**
+     * OrthographicCamera( left, right, top, bottom, near, far )
+     * 这里的 上下左右  是偏移量
+     * 这里添加了一个比例，如果相机的宽度个高度的比例和渲染的比例对不上，最后渲染出来就会变形
+     */
+    const acspet = width / height;
+    const camera2 = new THREE.OrthographicCamera(-5 * acspet, 5 * acspet, 5, -5, 1, 100);
+    camera2.position.set(10,10,10)
+    camera2.lookAt(0, 0, 0);
+
+
+    // //添加相机辅助线
+    // scene.add(new THREE.CameraHelper(camera))
+
+    //坐标轴辅助
+    var axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+    scene.add(axes);
+
+    /*渲染器*/
+    var renderer = new THREE.WebGLRenderer({
+        antialias : true
+    });
+
+    renderer.setSize(width, height);
+    container.append(renderer.domElement); //将dom加入
+    renderer.setClearColor('#000');
+
+    /*添加box*/
+    var box = new THREE.Mesh(
+        new THREE.BoxGeometry(2,2,2),
+        new THREE.MeshBasicMaterial({
+            color: 0xffff00,
+            // wireframe:true
+        })
+    );
+    box.position.set(0,0,0);
+    scene.add(box);
+
+    /*渲染场景*/
+    renderer.render(scene, camera)
+
+    $(".change-camera").click(function () {
+        if($(this).html()==="切换成透视相机"){
+            $(this).html("切换成正交相机")
+            renderer.clear();
+            renderer.render(scene, camera)
+        }else{
+            $(this).html("切换成透视相机")
+            renderer.clear();
+            renderer.render(scene, camera2)
+        }
+    })
+
+
+    //绕点飞行
+    /*
+
+    const O = [0,0],R = 80
+    let  a = 0,x   =  O[0] +  R   *   Math.cos(a),
+        z = O[1] +  R * Math.sin(a)
+    function animate() {
+        a = a + 0.01
+        x =  O[0] + R * Math.cos(a)
+        z = O[1] + R * Math.sin(a)
+        camera.position.set(x,30,z)
+        camera.lookAt(new THREE.Vector3(0,0,0))
+        requestAnimationFrame( animate )
+        renderer.render(scene, camera)
+    }
+    animate()
+
+    */
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

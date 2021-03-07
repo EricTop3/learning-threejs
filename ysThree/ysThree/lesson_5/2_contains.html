@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>判断物体是否在一个物体空间内部</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">判断物体是否在一个物体空间内部</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    ysThree.init({
+        el:document.getElementById('box'),
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+        const text = ysThree.createSpriteText("判断 一个物体是否在另一个物体内部",{
+            color:'yellow',
+            fontSize:5
+        })
+        text.position.set(0,3,0)
+        scene.add(text)
+
+        const box = new THREE.Mesh(new THREE.BoxGeometry(5,5,5),new THREE.MeshBasicMaterial({color:'red',opacity:0.5,transparent:true}))
+        scene.add(box)
+        /*
+        * 计算当前几何体的外边界矩形。该方法会更新 Geometry.boundingBox
+        * .computeBoundingSphere:计算当前几何体的外边界球。该方法会更新 Geometry.boundingSphere 属性值。
+        * 计算外边界矩形或外边界球并不是默认会自动调用的方法，这两个函数需要被显示的调用才能天得到相应属性值，否则对应属性值保持默认值 null。
+        * */
+        box.geometry.computeBoundingBox()
+
+        const box2 = new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial({color:'red'}))
+        box2.position.set(0,0,3)
+        box2.add(new THREE.AxisHelper(2))
+        scene.add(box2)
+
+        /**
+         * 判断obj2是否在obj1空间内部。
+         * @param obj1
+         * @param obj2
+         * @returns {*|boolean}
+         */
+        camera.position.set(30,30,30)
+        const isIn = (obj1,obj2) =>{
+            const position = obj2.getWorldPosition(new THREE.Vector3());
+            const localPosition = position.applyMatrix4(new THREE.Matrix4().getInverse(obj1.matrixWorld));
+            return obj1.geometry.boundingBox.containsPoint(localPosition) // geometry.boundingSphere //球形
+        }
+        function animate(){
+            //首先更新盒子的世界矩阵
+            box.updateMatrixWorld()
+            ysThree.rotateWorldAxis(box,new THREE.Vector3(0,1,0),0.01*Math.PI)   // 或者:box.rotateX (0.01*Math.PI)
+            box2.rotateX (0.01*Math.PI)
+            requestAnimationFrame( animate )
+            if(isIn(box, box2)){
+                box2.material.color.set('red');
+            }else{
+                box2.material.color.set('#fff');
+            }
+            renderer.render(scene,camera)
+        }
+        animate()
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

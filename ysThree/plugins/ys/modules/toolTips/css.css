@@ -1,0 +1,22 @@
+/*超出范围省略号*/
+.ys-tooltips{
+    /*此为标记*/
+}
+.ys-ellipsis{
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor:pointer
+}
+.ys-tooltips-layer{
+    position: fixed;
+    display: none;
+    padding: 10px 15px;
+    line-height: 28px;
+    background-color: #fff;
+    color: #000;
+    box-shadow:0 0 10px #ddd;
+    z-index: 999;
+    user-select: none;
+    box-sizing: border-box;
+}

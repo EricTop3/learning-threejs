@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>文字</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="container ys-absolute-container" id="container" style="overflow: hidden;"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">文字</div>
+    <div class="ys-block">
+        1：几何字体<br />
+        2：使用精灵制作二维文字<br/>
+    </div>
+</div>
+</body>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/utils/SceneUtils.js"></script>
+<script>
+    function init() {
+        const container = $("#container"),
+            width = container.width(),
+            height = container.height()
+        //场景
+        const scene = new THREE.Scene();  // 场景
+
+        //相机
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        camera.position.set(0,100,150)
+        camera.lookAt(scene.position);
+        //渲染器
+        const renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+        renderer.setClearColor('#000');
+
+        //坐标轴辅助
+        const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+        scene.add(axes);
+
+        return {
+            scene,camera,renderer
+        }
+    }
+    const initObj = init(),
+        scene = initObj.scene ,
+        renderer = initObj.renderer,
+        camera = initObj.camera
+
+    //地面
+    const planeGeometry = new THREE.PlaneGeometry(150, 150);
+    const planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    //水平面旋转并且设置位置
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.set(0,0,0)
+    scene.add(plane);
+
+    //添加灯光
+    const pointLight = new THREE.PointLight( 0xffffff, 2, 0);
+    pointLight.position.set( 0, 70, 10 );
+    scene.add( pointLight );
+    //灯光辅助
+    const sphereSize = 1;
+    const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
+    scene.add( pointLightHelper )
+
+    //告诉渲染器，我们需要阴影映射
+    renderer.shadowMap.enabled = true;
+    //平面是接受阴影
+    plane.receiveShadow = true;
+    //需要给光源同样设置具有阴影
+    pointLight.castShadow = true;
+
+    const loader = new THREE.FontLoader();
+    loader.load( '../../plugins/threeLibrary/fonts/gentilis_bold.typeface.json', function ( font ) {
+        const geometry = new THREE.TextGeometry( 'Hello 跃焱邵隼', { //中文字体不支持 请下载支持中文的字体
+            font: font,
+            size: 12,
+            height:1
+        });
+        const text1 = new THREE.Mesh(geometry,new THREE.MeshPhongMaterial({
+            color: 'red',
+            specular: 0x009900,
+            shininess: 30,
+        }))
+        text1.position.y = 10;
+        scene.add(text1);
+        text1.castShadow = true
+        renderer.render(scene,camera)
+    });
+    /**
+     *
+     * 使用精灵创建二维文字
+     */
+    function makeTextSprite( text, options )
+    {
+        if ( options === undefined ) options = {};
+
+        const fontsize = options.fontSize || 18
+            ,thickness = options.thickness || 4
+            ,color = options.color || '#000'
+            , fontface = options.fontFace || "Arial";
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        context.lineWidth = thickness;
+        context.fillStyle = color;
+        context.font = "Bold " + fontsize + "px " + fontface;
+        context.fillText( text,thickness, fontsize + thickness);
+
+        const texture = new THREE.Texture(canvas)
+        texture.needsUpdate = true
+
+        const spriteMaterial = new THREE.SpriteMaterial( { map: texture} );
+        const sprite = new THREE.Sprite( spriteMaterial );
+        sprite.scale.set(0.5 * fontsize, 0.25 * fontsize, 0.75 * fontsize);
+        return sprite;
+    }
+
+    const text = makeTextSprite( "跃焱邵隼", { fontSize: 50,color:'red' } );
+    text.position.set(-40,10,-40);
+    scene.add(text);
+
+    //绕点飞行
+    const O = [0,0],R = 80
+    let  a = 0,x  =  O[0] +  R   *   Math.cos(a),
+        z = O[1] +  R * Math.sin(a)
+    function animate() {
+        a = a + 0.01
+        x =  O[0] + R * Math.cos(a)
+        z =  O[1] + R * Math.sin(a)
+        camera.position.set(x,30,z)
+        camera.lookAt(new THREE.Vector3(0,0,0))
+        requestAnimationFrame( animate )
+        renderer.render(scene, camera)
+    }
+    animate()
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

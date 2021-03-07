@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>gltf</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+    <style>
+        form *{color:#fff;}  form .ys-select-options *{color:#000;}
+    </style>
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+    <form class="ys-form" action="javascript:;">
+        <div class="ys-input-item">
+            <div class="ys-input-label">状态</div>
+            <div class="ys-input-block">
+                <select class="ys-select my-select" name="states" ys-unique="ys-select-1" ys-clearable="true">
+                    <option value="">请选择</option>
+                    <option value="Idle" selected>Idle</option>
+                    <option value="Walking">Walking</option>
+                    <option value="Running">Running</option>
+                    <option value="Dance">Dance</option>
+                </select>
+            </div>
+        </div>
+        <div class="ys-input-item">
+            <div class="ys-input-label">表情</div>
+            <div class="ys-input-block">
+                <select class="ys-select my-select" name="emotes" ys-unique="ys-select-2" ys-clearable="true">
+                    <option value="">请选择</option>
+                    <option value="Jump" selected>Jump</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="Wave">Wave</option>
+                    <option value="Punch">Punch</option>
+                    <option value="ThumbsUp">ThumbsUp</option>
+                    <option value="Death">Death</option>
+                    <option value="Sitting">Sitting</option>
+                    <option value="Standing">Standing</option>
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">gltf</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/GLTFLoader.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    ys.form.render();
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+
+        renderer.setPixelRatio( window.devicePixelRatio )
+
+        //add light
+        const directionalLight = new THREE.DirectionalLight( 0xffeedd );
+        directionalLight.position.set( 0, 0, 1 ).normalize();
+        scene.add( directionalLight )
+
+        /*  ***********/
+        const loadingDom =  ysThree.loading("object文件")
+        const	loader = new THREE.GLTFLoader()
+        let object,animations,mixer,statesAction,emotesAction,statesActionName =  'Idle',emotesActionName =  'Jump'
+
+
+        const states = [ 'Idle', 'Walking', 'Running', 'Dance'];//状态 -- 持续性动作
+        const emotes = [ 'Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp' , 'Death', 'Sitting', 'Standing' ]; // 表情 -- 一次性动作
+
+        loader.load( "../../data/ysThree/models/gltf/RobotExpressive/RobotExpressive.glb", function ( gltf ) {
+            //
+            object = gltf.scene
+            //
+            object.traverse( function ( node ) {
+                if ( node.isMesh || node.isLight ) node.castShadow = true
+            })
+
+            //get the animation
+            animations = gltf.animations
+
+            //console.log(animations);//内置了14个动画 我们将其分为表情和状态 并让表情只做一次 状态一直保持
+            //获取 mixer
+            mixer = new THREE.AnimationMixer( object )
+
+            doAction(statesActionName)
+
+            object.scale.set(1,1,1)
+            //add object to scene
+            scene.add( object )
+            document.body.removeChild(loadingDom)
+        })
+
+        function whenFinished() {
+            mixer.removeEventListener( 'finished',whenFinished)
+            emotesAction.fadeOut(0.2).stop() //fadeOut fadeIn过度效果 避免动作突然卡顿
+            statesAction.fadeIn(0.2).play()
+        }
+        function doAction(actionName) {
+            if(states.indexOf(actionName)!==-1){ //该动画属于states
+
+                if(statesAction) statesAction.stop() //先停止该动画 再重新赋值动画，动作叠加
+                statesAction = mixer.clipAction( animations.filter(e => e.name === statesActionName)[0])
+                statesAction.fadeIn(0.2).play()
+            }
+            else if(emotes.indexOf(actionName)!==-1){ //该动画属于表情
+
+                statesAction.fadeOut(0.2).stop()//先停止states
+
+                if(emotesAction) emotesAction.stop() //先停止该动画 再重新赋值动画，动作叠加
+
+                emotesAction = mixer.clipAction( animations.filter(e => e.name === emotesActionName)[0])
+                emotesAction.play()
+                emotesAction.clampWhenFinished = true //完成后固定
+                emotesAction.loop = THREE.LoopOnce  //只循环一次 不再循环
+
+                mixer.addEventListener( 'finished',whenFinished)
+            }
+        }
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 200;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+
+        //
+        let clock = new THREE.Clock()
+        function animate() {
+            controls.update()
+            renderer.render(scene,camera)
+            requestAnimationFrame(animate)
+
+            /** 动画 */
+            const delta = clock.getDelta()
+            if ( mixer) {
+                mixer.update( delta )
+            }
+        }
+        animate()
+
+        /**
+         *  someAction.stop() ：停止指定动作 ，并还原动作
+         *  mixer.stopAllAction()：停止所有动作，但动作不还原
+         */
+
+        ys.monitor.on("ys-select-1",function (e) {
+             statesActionName = e.value
+             doAction(statesActionName)
+        })
+        ys.monitor.on("ys-select-2",function (e) {
+            emotesActionName = e.value
+            doAction(emotesActionName)
+        })
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

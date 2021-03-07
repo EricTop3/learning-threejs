@@ -1,0 +1,64 @@
+.ys-layer .ys-layer-main{
+    position: absolute;
+    left:50%;
+    top:50%;
+    background-color: #fff;
+    overflow:auto;
+    box-shadow:0 0 10px #c9c9c9
+}
+.ys-layer-main .layer-icons{
+    position: absolute;
+    top:10px;
+    right:10px;
+    z-index: 223;
+    user-select: none;
+}
+.ys-layer-main .layer-icons .ys-icon{
+    font-size: 18px;
+    opacity: 0.8;
+    transition: all .35s;
+    margin-left: 10px;
+}
+.ys-layer-main .layer-icons .ys-icon-full-screen:hover,.ys-layer-main  .layer-icons .ys-icon-exit-screen:hover,.layer-icons .ys-icon-minus:hover{
+    color:#1E9FFF;
+    opacity: 1;
+    cursor: pointer;
+}
+.ys-layer-main .layer-icons .ys-icon-close:hover{
+    color:red;
+    opacity: 1;
+    cursor: pointer;
+}
+.ys-layer-main .layer-tit{
+    border-bottom: 1px solid #ddd;
+    background-color: #F8F8F8;
+    padding:8px 80px 8px 15px;
+    z-index: 222;
+    user-select: none;
+}
+.ys-layer-main .layer-con{
+    position: absolute;
+    top:48px;
+    left:0;
+    right:0;
+    bottom: 0;
+    overflow: auto;
+    padding: 15px 15px;
+    word-break:break-all
+}
+.ys-layer-packed-box{
+    position: fixed;
+    bottom: 0;
+    left:0;
+    z-index: 222;
+}
+.ys-layer-packed-box>div{
+    display: inline-block;
+    line-height: 35px;
+    padding: 5px 10px;
+    width: 100px;
+    margin: 0 5px;
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: 0 0 10px #c9c9c9;
+}

@@ -1,0 +1,99 @@
+.edit-container {
+    /*background-color: #f9f9f9;*/
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.edit-container section.content {
+    min-height: 100%;
+    width: 100%;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+.content .pane {
+    position: relative;
+    padding: 0;
+}
+.codePaneTool {
+    position: absolute;
+    left:0;
+    right:0;
+    line-height: 30px;
+    z-index: 800;
+    background-color: #C1C1C1;
+    color:#fff;
+    padding: 8px 22px;
+    box-shadow: 0 2px 2px #E8E8E8;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.left{
+    position: absolute;
+    top:0;
+    left:0;
+    width: 0;
+    bottom: 0;
+    overflow: auto;
+}
+.right{
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom: 0;
+}
+.right-men{
+    display: none;
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom: 0;
+    z-index: 999;
+    background-color: rgba(0,0,0,0);
+}
+#codePane {
+    height:100%;
+    box-shadow: 2px 0 6px #cccccc;
+}
+#previewPane {
+    height:100%;
+}
+.left-bar{
+    position: absolute;
+    top:0;
+    bottom: 0;
+    right:0;
+    width:8px;
+    cursor: col-resize;
+    background-color: rgba(0,0,0,0);
+    z-index: 666;
+}
+#editor {
+    font-family: Consolas, monaco, 'Courier New', Courier, monospace;
+    position: absolute;
+    top: 48px;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    line-height: 18px;
+    font-size: 13px;
+}
+
+#innerPage {
+    width: 100%;
+    height: 100%;
+    border: none;
+    overflow: auto;
+}
+#showCodeBtn {
+    z-index: 900;
+    position: absolute;
+    top: 10px;
+    right:20px;
+}

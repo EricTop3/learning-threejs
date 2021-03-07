@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>video</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+    <span class="ys-btn ys-btn-sm  separate-btn">分开</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">video</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+<video id="video" muted="" autoplay="" loop="" crossorigin="" controls="" style="position: absolute;z-index: -1;">
+    <source src="../../images/ysThree/2.mp4" type="video/mp4">
+    Your browser does not support the <code>video</code> element.
+</video>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+
+    const el = document.getElementById('box')
+
+    const app = new YsThree(el,{
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+
+    const camera = app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls(THREE.OrbitControls)
+    const clock = new THREE.Clock()
+    //app.initStatus(Stats)
+
+    renderer.shadowMap.enabled = true
+    renderer.setPixelRatio( window.devicePixelRatio )
+
+    //add light
+    const light = new THREE.SpotLight()
+    light.position.set(0, 30, 30)
+    light.intensity = 2
+    scene.add(light)
+    light.castShadow = true
+    /*  **** **** ****   ****/
+
+    const  video = document.getElementById( 'video' );
+    //video.play()
+    const texture = new THREE.VideoTexture( video )
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.format = THREE.RGBFormat;
+    const material = new THREE.MeshBasicMaterial({
+        color:'#fff',
+        map:texture
+    })
+
+    const xsize = 4 //方块x长
+        ,ysize = 4 //方块y长
+        ,xgrid = 6 //x方向个数
+        ,ygrid = 6 //y方向个数
+
+    const group = new THREE.Group()
+    for(let i = 0;i< xgrid; i++){  // 4 * 4  1/16 =
+        for(let j =0;j< ygrid; j++){
+            const geo = new THREE.BoxBufferGeometry(xsize,ysize,xsize) //必须是buffer
+            change_uvs(geo,1 / xgrid,1 / ygrid , i , j) //修改该geo的uv贴图方式
+            const box = new THREE.Mesh(geo,material)
+            box.position.set(( i - xgrid / 2 ) * xsize,2,( j - ygrid / 2 ) * ysize)
+            //scene.add(box)
+            box.random_position_x = 50-Math.random()*100
+            box.random_position_z = 50-Math.random()*100
+            box.random_position_y = 60-Math.random()*60
+            group.add(box)
+        }
+    }
+    scene.add(group)
+    group.rotateX(Math.PI)
+
+    //随机位置
+    function randomPositon() {
+        group.children.forEach(function (e) {
+            e.position.x =  e.position.x > e.random_position_x ?   e.position.x  : e.position.x + 0.1
+            e.position.y = e.position.y> e.random_position_y ?  e.position.y : e.position.y + 0.1
+            e.position.z = e.position.z> e.random_position_z ?  e.position.z : e.position.z + 0.1
+        })
+    }
+
+
+    function change_uvs( geometry, unitx, unity, offsetx, offsety ) {
+        let uvs = geometry.attributes.uv.array
+        for ( let i = 0; i < uvs.length; i += 2 ) {
+            uvs[ i ] = ( uvs[ i ] + offsetx ) * unitx;
+            uvs[ i + 1 ] = ( uvs[ i + 1 ] + offsety ) * unity;
+        }
+    }
+
+    /*  **** **** ****   ****/
+    let flog = false
+    function render() {
+        controls.update(clock.getDelta())
+        renderer.render( scene,camera)
+        // TWEEN.update()
+        // app.staus.update()
+        requestAnimationFrame(render)
+
+        if(flog) randomPositon()
+    }
+    render()
+    $(".separate-btn").click(()=>{
+        flog = true
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

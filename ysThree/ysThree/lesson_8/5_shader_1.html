@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>图片灰度生成高度</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">图片灰度生成高度</div>
+    <div class="ys-block"></div>
+</div>
+</body>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/createJs/tween.min.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/LoaderSupport.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/MTLLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/OBJLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/OBJLoader2.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+    const el = document.getElementById('box')
+
+    const app = new YsThree(el,{
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+    const camera = app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls()
+    const clock = new THREE.Clock()
+
+    //add light
+    const directionalLight = new THREE.DirectionalLight( '#fff' )
+    directionalLight.position.set( 30, 30, 30 ).normalize()
+    scene.add( directionalLight )
+    const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+    scene.add(ambientLight)
+    camera.position.set(500,500,500)
+    /*  **** **** ****   ****/
+
+    app.initStatus(Stats)
+    const earthShader = {
+        vertexShader: `
+	varying vec4 v_color; // 用来存储当前顶点颜色
+	varying vec2 v_uv; // UV
+	uniform float u_height; // 生成的高度
+	uniform float u_radius; // 半径
+    uniform sampler2D u_bump; // 高度图
+    // 插值计算
+	float lerp(float x, float y, float t) {
+		return (1.0 - t) * x + t * y;
+    }
+    // 获得当前向量与中心点的距离
+	float glength(vec3 p) {
+		return sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
+    }
+    // 传入当前向量 需要返回的长度
+	vec3 setLength(vec3 p, float length) {
+		vec3 c_position = p;
+		float scale = length / glength(c_position);
+		c_position.x *= scale;
+		c_position.y *= scale;
+		c_position.z *= scale;
+		return c_position;
+	}
+	void main() {
+		v_uv = uv; // uv
+        v_color = texture2D(u_bump, uv); // 生成当前高度信息
+        float c_height = v_color.r * u_height; // 生成当前的高度 当前的灰度r值 * 基础高度
+        vec3 vposition = setLength(position, u_radius + c_height); // 生成新的向量 离中心距离为当前基础半径+生成的高度
+        // 传递position
+		vec4 mPosition = modelViewMatrix * vec4(vposition, 1.0);
+		gl_Position = projectionMatrix * mPosition;
+	}
+`,
+        fragmentShader: `
+	uniform float u_opacity; // 透明度
+	uniform vec3 u_color; // 基础颜色
+	varying vec2 v_uv; // UV
+	uniform sampler2D u_map; // 基础材质
+	void main() {
+		gl_FragColor = vec4(u_color, u_opacity) * texture2D(u_map, v_uv);
+	}
+`}
+    const options = {
+        radius: 100, // 地球的半径
+        segments: 640, // 地球的分段数 数量越高 地球精度越高
+        map: '../../images/ysThree/earth.jpg', // 地球材质
+        bump: '../../images/ysThree/earthSpec.png' // 生成高度材质
+    };
+    // 生成球类几何
+    const geometry = new THREE.SphereBufferGeometry(options.radius, options.segments, options.segments);
+    // 使用自定义着色器
+    const material = new THREE.ShaderMaterial({
+        uniforms: {
+            u_radius: {
+                value: options.radius // 半径
+            },
+            u_height: {
+                value: - 5 // 生成的高度
+            },
+            u_map: {
+                value: new THREE.TextureLoader().load(options.map) // 贴图
+            },
+            u_bump: {
+                value: new THREE.TextureLoader().load(options.bump) // 高度图
+            },
+            u_color: {
+                value: new THREE.Color('rgb(255, 255, 255)')
+            },
+            u_opacity: {
+                value: 1.0
+            }
+        },
+        transparent: true,
+        vertexShader: earthShader.vertexShader, // 顶点着色器
+        fragmentShader: earthShader.fragmentShader, // 片元着色器
+    });
+    const earth = new THREE.Mesh(geometry, material)
+    scene.add(earth)
+    /*  **** **** ****   ****/
+    function render() {
+        controls.update(clock.getDelta())
+        renderer.render( scene,camera)
+        TWEEN.update()
+        app.staus.update()
+        requestAnimationFrame(render)
+
+    }
+    render()
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

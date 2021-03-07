@@ -1,0 +1,76 @@
+.ys-messageBoxes{
+    position:fixed;
+    z-index: 9999;
+}
+.ys-messageBox{
+    position: relative;
+    padding: 15px 30px 15px 15px;
+    box-shadow: 0 0 10px #c9c9c9;
+    background-color: #fff;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    word-break:break-all
+}
+.ys-messageBox-tit{
+    font-size: 16px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ys-messageBox-tit+.ys-messageBox-con{
+    margin-top:5px;
+}
+.ys-messageBox-con{
+    color: #323232
+}
+.ys-messageBox>.ys-icon-close{
+    position: absolute;
+    right:8px;
+    top:8px;
+    font-size: 16px;
+    color:#323232
+}
+.ys-messageBox>.ys-icon-close:hover{
+    color:red;
+    cursor: pointer;
+}
+.ys-messageBox>.ys-icon:first-child+div,.ys-messageBox>img+div{
+    margin-left: 40px;
+}
+.ys-messageBox .ys-icon-cry{
+    color:#f56c6c
+}
+.ys-messageBox .ys-icon-wow{
+    color:#FFB800
+}
+.ys-messageBox .ys-icon-smile{
+    color:#67C23A
+}
+.ys-messageBox .ys-icon-notice{
+    color: #FF5722
+}
+.ys-messageBoxes.showType-top-center{
+    left:50%;
+    top:10px;
+}
+.ys-messageBoxes.showType-bottom-center{
+    left:50%;
+    bottom:10px;
+}
+.ys-messageBoxes.showType-left-top{
+    left:10px;
+    top:10px;
+}
+.ys-messageBoxes.showType-left-bottom{
+    left:10px;
+    bottom:10px;
+}
+.ys-messageBoxes.showType-right-top{
+    right:10px;
+    top:10px;
+}
+.ys-messageBoxes.showType-right-bottom{
+    right:10px;
+    bottom:10px;
+}

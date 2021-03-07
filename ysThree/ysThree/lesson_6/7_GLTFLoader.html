@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>gltf</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+    <select class="ys-select" style="background-color: #fff;padding: 2px 10px">
+        <option value="21">停止所有并动作还原</option>
+        <option value="20">停止所有</option>
+        <option value="19">所有动作</option>
+        <option value="0" selected>动画1</option>
+        <option value="2">动画2</option>
+        <option value="3">动画3</option>
+        <option value="4">动画4</option>
+        <option value="5">动画5</option>
+        <option value="6">动画6</option>
+        <option value="7">动画7</option>
+        <option value="8">动画8</option>
+        <option value="9">动画9</option>
+        <option value="10">动画10</option>
+        <option value="11">动画11</option>
+        <option value="13">动画13</option>
+        <option value="14">动画14</option>
+        <option value="15">动画15</option>
+        <option value="16">动画16</option>
+        <option value="17">动画17</option>
+        <option value="18">动画18</option>
+    </select>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">gltf</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/GLTFLoader.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+
+        renderer.setPixelRatio( window.devicePixelRatio )
+
+        //add light
+        const directionalLight = new THREE.DirectionalLight( 0xffeedd );
+        directionalLight.position.set( 0, 0, 1 ).normalize();
+        scene.add( directionalLight )
+
+        /*  ***********/
+        const loadingDom =  ysThree.loading("object文件")
+        const	loader = new THREE.GLTFLoader()
+        let object
+        let animations
+        let mixer
+        let currentAction
+        let currenActionIndex = 0
+        loader.load( "../../data/ysThree/models/gltf/cesiumMan/CesiumMan.gltf", function ( gltf ) {
+            //
+            object = gltf.scene
+
+            //
+            object.traverse( function ( node ) {
+                if ( node.isMesh || node.isLight ) node.castShadow = true
+            })
+
+            //get the animation
+            animations = gltf.animations
+            // console.log(animations.length); //内置了 十九个动画
+
+            if ( animations && animations.length>0 ) {
+                mixer = new THREE.AnimationMixer( object )
+
+                currentAction = mixer.clipAction( animations[currenActionIndex]) //每个动作分支
+                currentAction.play()
+
+                /** 所有动作同时做: */
+                /*
+                for ( let i = 0; i < animations.length; i ++ ) {
+                    // animations[ i ].duration = 0.333
+                    let action = mixer.clipAction( animations[ i ] )
+                    action.play()
+                }
+                */
+            }
+            object.scale.set(4,4,4)
+
+            scene.add(object)
+
+            document.body.removeChild(loadingDom)
+        })
+
+
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 200;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+
+        //
+        let clock = new THREE.Clock()
+        function animate() {
+            controls.update()
+            renderer.render(scene,camera)
+            requestAnimationFrame(animate)
+
+            /** 动画 */
+            const delta = clock.getDelta()
+            if ( mixer) {
+                mixer.update( delta )
+            }
+        }
+        animate()
+
+        /**
+         *  someAction.stop() ：停止指定动作 ，并还原动作
+         *  mixer.stopAllAction()：停止所有动作，但动作不还原
+         */
+
+        $(".ys-select").change(function () {
+            currenActionIndex = $(this).val()
+            if ( animations && animations.length>0 ) {
+                if(currenActionIndex === '21'){
+                    currentAction.stop() //这个也要清除
+                    //mixer.stopAllAction()
+                    for ( let i = 0; i < animations.length; i ++ ) { //多了一个currentAction 也要清除
+                        const action = mixer.existingAction( animations[i] )
+                        action.stop()
+                    }
+                } else  if(currenActionIndex === '20'){
+                    mixer.stopAllAction()
+                }else if(currenActionIndex === '19'){
+                    mixer.stopAllAction()
+                    for ( let i = 0; i < animations.length; i ++ ) {
+                        // animations[ i ].duration = 0.333
+                        let action = mixer.clipAction( animations[ i ] )
+                        action.play()
+                    }
+                }else{
+                    mixer.stopAllAction()
+                    // currentAction.stop()
+                    currentAction = mixer.clipAction( animations[currenActionIndex])
+                    currentAction.play()
+                }
+            }
+
+        })
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

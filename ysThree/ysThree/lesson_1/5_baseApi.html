@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>常用api总结</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+    <style>
+        .ys-input-label{
+            text-align: left;
+            width: 150px;
+
+        }
+    </style>
+</head>
+<body>
+
+<div class="ys-absolute-container">
+    <div class="ys-tit">小结一下</div>
+    <table class="ys-table   ys-table-border">
+        <colgroup>
+            <col width="200">
+            <col width="200">
+            <col>
+        </colgroup>
+        <thead>
+        <tr>
+            <th>主角</th>
+            <td>函数/属性</td>
+            <td>描述</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td rowspan="8">scene</td>
+        </tr>
+        <tr>
+            <td>add(obj)</td>
+            <td>向场景中添加一个对象</td>
+        </tr>
+        <tr>
+            <td>children</td>
+            <td>获取场景中所有对象，包括相机和光源</td>
+        </tr>
+        <tr>
+            <td>getChildByName(name)</td>
+            <td>较新api重新命名：getObjectByName 创建对象时可以指定一个唯一name,如box.name="一个盒子",通过此函数可以获取</td>
+        </tr>
+        <tr>
+            <td>remove(obj)</td>
+            <td>移除一个对象</td>
+        </tr>
+        <tr>
+            <td>traverse(function)</td>
+            <td>与children雷同，你可以通过此函数回调一个子函数来获取场景中对象,相比于直接使用Object3D.children，traverse会递归遍历所有子孙</td>
+        </tr>
+        <tr>
+            <td>fog</td>
+            <td>雾化效果，如：scene.fog = new THREE.Fog(0xffffff, 0.015,100);//雾化效果</td>
+        </tr>
+        <tr>
+            <td>overrideMaterial</td>
+            <td>通过这个属性，可以直接强制所有对象采用此材质</td>
+        </tr>
+        <tr>
+            <td rowspan="5">renderer</td>
+        </tr>
+        <tr>
+            <td>render(scene, camera)</td>
+            <td>渲染</td>
+        </tr>
+        <tr>
+            <td>setSize(width, height)</td>
+            <td>设置画布宽高</td>
+        </tr>
+        <tr>
+            <td>setClearColor(color)</td>
+            <td>设置画布背景色</td>
+        </tr>
+        <tr>
+            <td>clear()</td>
+            <td>清空渲染</td>
+        </tr>
+        <tr>
+            <td rowspan="3">camera</td>
+        </tr>
+        <tr>
+            <td>position</td>
+            <td>获取相机位置 可以通过.x设置x方向位置(同理y，z);也可以通过.set(x,y,z)</td>
+        </tr>
+        <tr>
+            <td>lookAt(x,y,z)</td>
+            <td>相机看点，通常这么写会更简单写camera.lookAt(scene.position)</td>
+        </tr>
+        <tr>
+            <td rowspan="5">mesh(几何对象等)</td>
+        </tr>
+        <tr>
+            <td>position</td>
+            <td>位置</td>
+        </tr>
+        <tr>
+            <td>rotation</td>
+            <td>旋转角度 rotation.x = 1/2*Math.PI标识对象x轴自旋转90度</td>
+        </tr>
+        <tr>
+            <td>scale</td>
+            <td>mesh.scale.x = 0.5 // mesh.set(0.5,1,1)</td>
+        </tr>
+        <tr>
+            <td>translateX(amount)</td>
+            <td>同理还有Y,Z；与前面不同它是在()内赋值</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="ys-block">
+        <div class="ys-tit-sm"><span>其他常用</span></div>
+        <div class="">
+            <div class="ys-input-item clearfix">
+                <div class="ys-input-label">更新盒边界</div>
+                <div class="ys-inline-block">
+                    box.geometry.computeBoundingBox()
+                </div>
+            </div>
+            <div class="ys-input-item clearfix">
+                <div class="ys-input-label">判断包含</div>
+                <div class="ys-inline-block">
+                    box.geometry.boundingBox.containsPoint(somePosition)
+                </div>
+            </div>
+            <div class="ys-input-item clearfix">
+                <div class="ys-input-label">获取盒边界中心点</div>
+                <div class="ys-inline-block">
+                    box.geometry.boundingBox.getCenter(new THREE.Vector3())//(.multiplyScalar(1)表示放大倍数)
+                </div>
+            </div>
+            <div class="ys-input-item clearfix">
+                <div class="ys-input-label"> 获取group的中心点</div>
+                <div class="ys-inline-block">
+                    new THREE.Box3().setFromObject( group).getCenter(new THREE.Vector3())
+                </div>
+            </div>
+            <div class="ys-input-item clearfix">
+                <div class="ys-input-label"> 更新世界矩阵</div>
+                <div class="ys-inline-block">
+                    box.updateMatrixWorld()/scene.updateMatrixWorld()
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+</html>

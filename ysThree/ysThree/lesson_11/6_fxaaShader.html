@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>FXAAShader</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">FXAAShader</div>
+    <div class="ys-block">
+        通常场景中如果 设置 antialias：true还是不行 那么可以使用FXAAShader来优化，抗锯齿
+    </div>
+</div>
+</body>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+
+<script src="../../plugins/threeLibrary/js/postprocessing/EffectComposer.js"></script>
+<script src="../../plugins/threeLibrary/js/postprocessing/RenderPass.js"></script>
+<script src="../../plugins/threeLibrary/js/postprocessing/ShaderPass.js"></script>
+
+<script src="../../plugins/threeLibrary/js/shaders/CopyShader.js"></script>
+<script src="../../plugins/threeLibrary/js/shaders/FXAAShader.js"></script>
+
+<script src="../../plugins/createJs/tween.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/dat.gui.min.js"></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+    const el = document.getElementById('box')
+
+    const app = new YsThree(el,{
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+    app.camera = new THREE.PerspectiveCamera( 45, ( el.offsetWidth * 0.5 ) / el.offsetHeight, 1, 2000 )
+    const camera =  app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls()
+    const clock = new THREE.Clock()
+    scene.background = new THREE.Color( 0xffffff )
+    scene.fog = new THREE.Fog( 0xcccccc, 100, 1500 )
+
+
+    /** need  **/
+    renderer.autoClear = false //必须要关闭 不然 不显示
+
+    //add light
+    const directionalLight = new THREE.DirectionalLight( '#fff' )
+    directionalLight.position.set( 30, 30, 30 ).normalize()
+    scene.add( directionalLight )
+    const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+    scene.add(ambientLight)
+
+
+    // add status
+    app.initStatus(Stats)
+    /*  **** **** ****   ****/
+    camera.position.set(0,0,500)
+
+    group = new THREE.Group();
+
+    const geometry = new THREE.TetrahedronBufferGeometry( 10 );
+    const material = new THREE.MeshStandardMaterial( { color: 0xee0808, flatShading: true } );
+
+    for ( let i = 0; i < 100; i ++ ) {
+
+        let mesh = new THREE.Mesh( geometry, material );
+
+        mesh.position.x = Math.random() * 500 - 250;
+        mesh.position.y = Math.random() * 500 - 250;
+        mesh.position.z = Math.random() * 500 - 250;
+
+        mesh.scale.setScalar( Math.random() * 2 + 1 );
+
+        mesh.rotation.x = Math.random() * Math.PI;
+        mesh.rotation.y = Math.random() * Math.PI;
+        mesh.rotation.z = Math.random() * Math.PI;
+
+        group.add( mesh );
+
+    }
+    scene.add( group )
+
+
+
+    //RenderPass
+    const renderPass = new THREE.RenderPass( scene, camera )
+    //使用FXAAShader
+    const fxaaPass = new THREE.ShaderPass( THREE.FXAAShader )
+    const pixelRatio = renderer.getPixelRatio()
+    fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( el.offsetWidth * pixelRatio )
+    fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / ( el.offsetHeight * pixelRatio )
+    composer1 = new THREE.EffectComposer( renderer )
+    composer1.addPass( renderPass );
+    composer1.addPass( fxaaPass );
+
+    //不使用
+    const copyPass = new THREE.ShaderPass( THREE.CopyShader )
+    composer2 = new THREE.EffectComposer( renderer )
+    composer2.addPass( renderPass )
+    composer2.addPass( copyPass )
+
+
+
+    //resize
+    window.addEventListener( 'resize', onWindowResize, false );
+    function onWindowResize() {
+        camera.aspect = el.offsetWidth /  el.offsetHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( el.offsetWidth, el.offsetHeight );
+
+        composer1.setSize( el.offsetWidth, el.offsetHeight );
+        composer2.setSize( el.offsetWidth, el.offsetHeight );
+
+        const pixelRatio = renderer.getPixelRatio()
+
+        fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( el.offsetWidth * pixelRatio );
+        fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / ( el.offsetHeight * pixelRatio );
+    }
+
+    //render
+    function render() {
+
+        requestAnimationFrame(render)
+        app.staus.update()
+
+        const halfWidth = el.offsetWidth / 2;
+
+        group.rotation.y += clock.getDelta() * 0.1;
+
+        renderer.setViewport( 0, 0, halfWidth, el.offsetHeight )
+        composer1.render()
+        renderer.setViewport( halfWidth, 0, halfWidth, el.offsetHeight )
+        composer2.render()
+    }
+    render();
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

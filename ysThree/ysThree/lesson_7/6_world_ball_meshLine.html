@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>3d球体世界</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden;"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">3d球体世界</div>
+    <div class="ys-block">
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/lines/MeshLine.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+
+        renderer.setPixelRatio( window.devicePixelRatio )
+        let resolution = new THREE.Vector2( el.offsetWidth,  el.offsetHeight );
+        //add light
+        const directionalLight = new THREE.DirectionalLight( '#fff' )
+        directionalLight.position.set( 30, 30, 30 ).normalize()
+        scene.add( directionalLight )
+        const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+        scene.add(ambientLight)
+
+        /*  ***********/
+        const R = 200
+
+        //绘制地图区域线条
+        const drawLine = function (pos,material) {
+            const geo = new THREE.Geometry()
+            pos.forEach( p =>{
+                geo.vertices.push(ysThree.geographicToVector(R,p[0],p[1]))
+            })
+
+            return new THREE.Line(geo,material)
+        }
+
+        new THREE.TextureLoader().load("../../images/ysThree/earth.jpg",textureNormal =>{
+            const material = new THREE.MeshPhongMaterial({
+                map: textureNormal,// 普通纹理贴图
+            })
+            const earthGeo = new THREE.SphereGeometry(R,50,50)
+            const earth = new THREE.Mesh(earthGeo,material)
+            scene.add(earth)
+            earth.position.set(0,0,0)
+            camera.position.set(60,60,60)
+        })
+        $.ajax({
+            url:'../../data/ysThree/geoJson/world.json', //china.json
+            type:'get',
+            success:function (res) {
+                new THREE.TextureLoader().load( '../../images/ysThree/red_line.png', function( texture ) {
+                    const worldGeometry = res
+                    const worldGroup = new THREE.Object3D()
+                    // 绘制世界地图
+                    worldGeometry.features.forEach(function (worldItem, worldItemIndex) {
+                        const length = worldItem.geometry.coordinates.length
+                        const multipleBool = length > 1
+                        let oneCountry = new THREE.Group()
+                        let part,material = new THREE.LineBasicMaterial({color:ysThree.randomColor(),transparent:true,opacity:0.4})
+
+                        //中国线标红
+                        if(worldItem.properties.name ==="China") material = new THREE.LineBasicMaterial({color:'red'})
+
+                        worldItem.geometry.coordinates.forEach(function (worldChildItem, worldChildItemIndex) {
+                            if (multipleBool) {
+                                if (worldChildItem.length && worldChildItem[0].length === 2) {
+                                    part = drawLine(worldChildItem,material)
+                                }else if (worldChildItem.length && worldChildItem[0].length > 2) {
+                                    part =  drawLine(worldChildItem[0],material)
+                                }
+                            } else {
+                                let countryPos = worldChildItem.length > 1 ? worldChildItem : worldChildItem[0]
+                                if (countryPos) {
+                                    part = drawLine(countryPos,material)
+                                }
+                            }
+                            //组合一个国家可能的几个分段
+                            if(part){
+                                oneCountry.add(part)
+                            }
+                        })
+
+                        //不使用group是是因为获取射线不方便，即使获取后代也不是想要的效果 因此使用合并
+                        oneCountry.name = worldItem.properties.name
+                        worldGroup.add(oneCountry)
+                    })
+                    scene.add(worldGroup)
+
+                    callback(texture)
+                })
+            }
+        })
+        camera.position.set(0, 0, 200)
+
+        const mark = {
+            "marking": [
+                {
+                    "name": "中国首都-北京",
+                    "color": "#c6aa0e",
+                    "fontSize": 12,
+                    "pos": [116.4551,40.2539]
+                },
+                {
+                    "name": "俄罗斯首都-莫斯科",
+                    "color": "#86a519",
+                    "fontSize": 12,
+                    "pos": [37.35,55.45]
+                },
+                {
+                    "name": "美国首都-华盛顿",
+                    "color": "#05a914",
+                    "fontSize": 12,
+                    "pos": [-77.02182,38.53707]
+                },
+                {
+                    "name": "澳大利亚首都-堪培拉",
+                    "color": "#05a914",
+                    "fontSize": 12,
+                    "pos": [149.07,-35.17]
+                },
+                {
+                    "name": "巴西首都-巴西利亚",
+                    "color": "#af0da9",
+                    "fontSize": 12,
+                    "pos": [-47.56,-15.47]
+                },
+                {
+                    "name": "南非首都-开普敦",
+                    "color": "#047f4f",
+                    "fontSize": 12,
+                    "pos": [18,-34]
+                },
+                {
+                    "name": "英国首都-伦敦",
+                    "color": "#ffffff",
+                    "fontSize": 12,
+                    "pos": [0.5, 51.3]
+                }
+            ]
+        }
+
+        const lines = []
+        function callback(texture){
+            const v0 =  ysThree.geographicToVector(R,mark.marking[0].pos[0],mark.marking[0].pos[1])
+            mark.marking.forEach(elem => {
+                const v3 = ysThree.geographicToVector(R,elem.pos[0],elem.pos[1])
+                const res = ysThree.getSphereHeightPoints(v0,v3,20,120) // 20 和 120 为调控角度 一般 R约大 20越大 越小20越小。
+
+                // 绘制贝塞尔曲线
+                const curve = new THREE.CubicBezierCurve3(v0, res[0],  res[1], v3)
+                /*
+                const geometry = new THREE.BufferGeometry()
+                geometry.setFromPoints(curve.getPoints(50))// 或者：geometry.vertices = curve.getPoints(50);
+                */
+                const geo = new THREE.Geometry()
+                geo.vertices = curve.getPoints(50);
+
+                const  meshLine = new MeshLine()
+                meshLine.setGeometry(geo)
+                const line = new THREE.Mesh(meshLine.geometry,new MeshLineMaterial({
+                    color:ysThree.randomColor(),
+                    map: texture,
+                    useMap: true,
+                    lineWidth:4,
+                    resolution: resolution,
+                    dashArray:0.9,  // 破折号之间的长度和间距。(0 -无破折号)
+                    dashRatio:0.1, // 定义可见和不可见之间的比率(0 -更可见，1 -更不可见)。
+                    dashOffset:0,
+                    transparent: true,
+                    sizeAttenuation: 1, //使线宽不变，不管距离(1个单位是屏幕上的1px)(0 -衰减，1 -不衰减)
+                    side: THREE.FrontSide,
+                    depthTest: true,
+                    blending: THREE.AdditiveBlending,
+                    near: camera.near,
+                    far: camera.far,
+                }))
+                scene.add(line)
+                lines.push(line)
+            });
+        }
+
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            // controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 1000;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+
+        $(window).resize(function () {
+            resolution = new THREE.Vector2( el.offsetWidth,  el.offsetHeight );
+        })
+
+        function animate() {
+            controls.update()
+            renderer.render(scene,camera)
+
+            requestAnimationFrame(animate)
+
+            lines.forEach(function (line) {
+                line.material.uniforms.dashOffset.value -= 0.01
+            })
+        }
+        animate()
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

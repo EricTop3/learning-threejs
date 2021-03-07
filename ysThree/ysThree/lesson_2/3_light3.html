@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>面灯光</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">灯光</div>
+    <div class="ys-block">
+        <table class="ys-table   ys-table-border">
+            <colgroup>
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>光源名称</th>
+                <td>描述</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>AmbientLight(环境光)</td>
+                <td>这是一种基础光 它的颜色会添加到整个场景和所有对象上</td>
+            </tr>
+            <tr>
+                <td>PointLight(点光源)</td>
+                <td>空间中一点，朝所有的方向发射光线</td>
+            </tr>
+            <tr>
+                <td>SpotLight(聚光灯光源)</td>
+                <td>这种光源有聚光的效果，手电筒，吊灯等</td>
+            </tr>
+            <tr>
+                <td>DirectionalLight(方向光/平行光)</td>
+                <td>也称作无限光，从这种光源发出的光可以看作是平行的，类似于太阳光</td>
+            </tr>
+            <tr>
+                <td>HemisphereLight(半球光)</td>
+                <td>这是一种特殊的光源，可以用来创建更加自然的室外光线，模拟反光面和光线较弱的天空</td>
+            </tr>
+            <tr>
+                <td>AreaLight(面光源)</td>
+                <td>使用这种光源可以指定散发光线的平面，而不是空间中的一个点</td>
+            </tr>
+            <tr>
+                <td>LensFlare(镜头眩光)</td>
+                <td>这不是一种光源，但可以通过它为场景中的光源添加眩光效果</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="ys-tit-sm">
+            * 其中AmbientLight，PointLight，SpotLight和DirectionalLight是基础光源，HemisphereLight，AreaLight，LensFlare是有特殊用途的光源
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/dat.gui.min.js"></script>
+<script>
+    function init(callback) {
+        const container = $("#box"),
+            width = container.width(),
+            height = container.height()
+        //场景
+        const scene = new THREE.Scene();  // 场景
+        scene.fog = new THREE.Fog(0xaaaaaa, 0.010, 200);
+        //相机
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        camera.position.set(-20,15,45)
+        camera.lookAt(scene.position);
+
+        //渲染器
+        const renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+        renderer.setClearColor('#000');
+
+        //坐标轴辅助
+        const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+        scene.add(axes);
+
+        callback(scene,camera,renderer)
+
+    }
+    init((scene,camera,renderer)=> {
+
+        // //平面
+        // const planeGeometry = new THREE.PlaneGeometry(60, 20);
+        // const planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+        // const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        // //水平面旋转并且设置位置
+        // plane.rotation.x = -0.5 * Math.PI;
+        // plane.position.set(0,-1,0)
+        // scene.add(plane);
+
+        //平面
+        const geoFloor = new THREE.BoxBufferGeometry( 2000, 0.1, 2000 );
+        const matStdFloor = new THREE.MeshStandardMaterial( { color: 0x808080, roughness: 0, metalness: 0 } );
+        const mshStdFloor = new THREE.Mesh( geoFloor, matStdFloor );
+        mshStdFloor.position.set(0,-1,0)
+        scene.add( mshStdFloor );
+
+        //方块
+        const cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+        const cubeMaterial = new THREE.MeshLambertMaterial({color: 'yellow'});
+        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        //设置方块位置
+        cube.position.set(-4,2,0)
+        scene.add(cube);
+
+        //球体
+        const matStdObjects = new THREE.MeshStandardMaterial( { color: 0xA00000, roughness: 0, metalness: 0 } );
+        const geoSphere = new THREE.SphereBufferGeometry( 4, 32, 32 );
+        const mshStdSphere = new THREE.Mesh( geoSphere, matStdObjects );
+        mshStdSphere.position.set( 5, 3, 5 );
+        mshStdSphere.castShadow = true;
+        mshStdSphere.receiveShadow = true;//也让其接受阴影
+        scene.add( mshStdSphere );
+
+
+        //环境光
+        const ambient = new THREE.AmbientLight( 0xffffff, 0.1 );
+        scene.add( ambient );
+
+        //点光源
+        const pointLight = new THREE.PointLight("yellow",0.5,1000);
+        pointLight.position.set(-20,20,-10)
+        scene.add(pointLight)
+        pointLight.castShadow = true;
+        //灯光辅助
+        const sphereSize = 1
+        const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize )
+        scene.add( pointLightHelper )
+
+        /**
+         * 面光源
+         * RectAreaLight( color, intensity,  width, height )
+        * */
+        const rectLight = new THREE.RectAreaLight( 0xffffff, 2,  10 , 10 );
+        rectLight.position.set( 5, 10, 0 );
+        rectLight.lookAt( 0, 0, 0 );
+        scene.add( rectLight )
+        // const  rectLightHelper = new THREE.RectAreaLightHelper( rectLight );
+        // rectLight.add( rectLightHelper );
+        const rectLightMesh = new THREE.Mesh( new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial( { side: THREE.BackSide } ) );
+        rectLightMesh.scale.x = rectLight.width;
+        rectLightMesh.scale.y = rectLight.height;
+        rectLight.add( rectLightMesh );
+
+        const rectLightMeshBack = new THREE.Mesh( new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial( { color: 0x080808 } ) );
+        rectLightMesh.add( rectLightMeshBack );
+
+
+        renderer.shadowMap.enabled = true;
+        //plane.receiveShadow = true;
+        mshStdFloor.receiveShadow = true;
+        cube.castShadow = true;
+        renderer.render(scene,camera)
+
+        const origin = new THREE.Vector3(0,0,0);
+        function animate() {
+            const t = ( Date.now() / 2000 )
+            requestAnimationFrame( animate );
+            const r = 15.0;
+            const lx = r * Math.cos( t );
+            const lz = r * Math.sin( t );
+            const ly = 5.0 + 5.0 * Math.sin( t / 3.0 );
+            rectLight.position.set( lx, ly, lz );
+            rectLight.lookAt( origin ); //始终看原点
+            renderer.render( scene, camera );
+        }
+        animate()
+    })
+
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

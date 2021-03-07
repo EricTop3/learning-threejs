@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>lod</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">lod</div>
+    <div class="ys-block">
+
+        多细节层次 —— 在显示网格时，根据摄像机距离物体的距离，来使用更多或者更少的几何体来对其进行显示。<br/>
+        每一个级别都和一个几何体相关联，且在渲染时，可以根据给定的距离，来在这些级别对应的几何体之间进行切换。 <br/>
+        通常情况下，你会创建多个几何体，比如说三个，一个距离很远（低细节），一个距离适中（中等细节），还有一个距离非常近（高质量）<br/>
+
+        --请注意，要使得LOD在各不同细节层次之间进行切换，你将需要在你的渲染循环中调用update( camera )<br/>
+        在进行大模型加载时，也可以使用远模糊，近细节的处理。
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/FlyControls.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        //gridHelper:true,//网格参考线
+       // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+
+        renderer.setPixelRatio( window.devicePixelRatio )
+
+        //add light
+        const directionalLight = new THREE.DirectionalLight( '#fff' )
+        directionalLight.position.set( 30, 30, 30 ).normalize()
+        scene.add( directionalLight )
+        const ambientLight = new THREE.AmbientLight('#fff',0.3)
+        scene.add(ambientLight)
+
+        /*  ***********/
+        const geometry = [
+            [ new THREE.IcosahedronBufferGeometry( 100, 4 ), 50 ],
+            [ new THREE.IcosahedronBufferGeometry( 100, 3 ), 300 ],
+            [ new THREE.IcosahedronBufferGeometry( 100, 2 ), 1000 ],
+            [ new THREE.IcosahedronBufferGeometry( 100, 1 ), 2000 ],
+            [ new THREE.IcosahedronBufferGeometry( 100, 0 ), 8000 ]
+
+        ];
+
+        const material = new THREE.MeshLambertMaterial( { color: 0xffffff, wireframe: true } );
+        let i, j, mesh, lod;
+        for ( j = 0; j < 1000; j ++ ) {
+            lod = new THREE.LOD()
+            for ( i = 0; i < geometry.length; i ++ ) {
+                mesh = new THREE.Mesh( geometry[ i ][ 0 ], material );
+                mesh.scale.set( 1.5, 1.5, 1.5 );
+                mesh.updateMatrix();
+                mesh.matrixAutoUpdate = false;
+                lod.addLevel( mesh, geometry[ i ][ 1 ] ) //object —— 在这个层次中将要显示的Object3D。distance —— 将显示这一细节层次的距离。
+            }
+            lod.position.x = 10000 * ( 0.5 - Math.random() );
+            lod.position.y = 7500 * ( 0.5 - Math.random() );
+            lod.position.z = 10000 * ( 0.5 - Math.random() );
+            lod.updateMatrix();
+            lod.matrixAutoUpdate = false
+            scene.add( lod )
+        }
+
+        /*  ***********/
+        function initControls() {
+            const controls = new THREE.FlyControls( camera , renderer.domElement );
+            controls.movementSpeed = 1000;
+            controls.rollSpeed = Math.PI / 10;
+            return controls
+        }
+        const  controls = initControls()
+
+        const clock = new THREE.Clock()
+        function animate() {
+
+            renderer.render(scene,camera)
+            controls.update( clock.getDelta() );
+
+            scene.updateMatrixWorld()
+            scene.traverse( function ( object ) {
+                if ( object instanceof THREE.LOD ) {
+                    object.update( camera );
+                }
+            });
+            requestAnimationFrame(animate)
+        }
+        animate()
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

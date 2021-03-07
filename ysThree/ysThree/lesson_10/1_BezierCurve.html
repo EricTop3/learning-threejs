@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>贝塞尔曲线</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">贝塞尔曲线</div>
+    <div class="ys-block">
+        three中封装了 贝塞尔曲线 二维二次 二维三次 三维二次 三维三次 贝塞尔曲线
+        二次是一个控制点 三次是两个控制点
+        我们这里  示例三维三次(两个控制点) 和三维二次(1个控制点)
+
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/ColladaLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/lines/MeshLine.js"></script>
+<script src="../../plugins/ysThree/ysThree_old.js"></script>
+<script>
+    const el = document.getElementById('box')
+    ysThree.init({
+        el:el,
+        cameraType:1,
+        gridHelper:true,//网格参考线
+        axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    },(scene,camera,renderer)=>{
+        renderer.setPixelRatio( window.devicePixelRatio )
+        renderer.shadowMap.enabled = true
+
+        //add light
+        const directionalLight = new THREE.DirectionalLight( '#fff' )
+        directionalLight.position.set( 30, 30, 30 ).normalize()
+        scene.add( directionalLight )
+        const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+        scene.add(ambientLight)
+
+        /*  ***********/
+        /** 三维二次 */
+        function addLine(v1,v2,v3) {
+            const curve = new THREE.QuadraticBezierCurve3(v1,v2,v3)
+
+            const points = curve.getPoints( 50 )
+            const geometry = new THREE.BufferGeometry().setFromPoints( points )
+
+            const curveObject = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color : 0xff0000 } ) )
+
+            scene.add(curveObject)
+        }
+
+        const v1_1 = new THREE.Vector3( -10, 0, 0 ),
+            v1_2 = new THREE.Vector3( 20, 15, 0 ),
+            v1_3 =  new THREE.Vector3( 10, 0, 0 )
+        addLine(v1_1, v1_2, v1_3)
+        //实际场景中 中心点都是计算得出
+        const  v2_1 = new THREE.Vector3( -10, 0, 0 ), v2_3 =  new THREE.Vector3( 10, 0, 0 ),
+        v2_2 = v2_1.clone().add(v2_3.clone()).divideScalar(2)
+        v2_2.y = 10 //制高点 y坐标
+
+       addLine(v2_1, v2_2, v2_3)
+
+        /**
+         * 三维三次
+         * */
+        function addLine2(v1,v2,v3,v4) {
+            const curve = new THREE.CubicBezierCurve3(v1,v2,v3,v4)
+
+            const points = curve.getPoints( 50 )
+            const geometry = new THREE.BufferGeometry().setFromPoints( points )
+
+            const material = new THREE.LineBasicMaterial( { color : 0xff0000 } )
+            const curveObject = new THREE.Line( geometry, material )
+            scene.add(curveObject)
+        }
+
+        const v3_1 = new THREE.Vector3( -10, 0,  10 ),
+            v3_2 =  new THREE.Vector3( -5, 15, 10 ),
+            v3_3 =  new THREE.Vector3( 20, 15,  10 ),
+            v3_4 =  new THREE.Vector3( 10, 0, 10 )
+        addLine2( v3_1,v3_2,v3_3,v3_4)
+
+        //在实际应用中 两个制高点也都是计算得出的。
+        //我们这里给出一个常用公式算法，这个公式封装于 ysThree中，用于3d球体的贝塞尔曲线绘制
+
+        //这样就可以了
+        const res = ysThree.getSphereHeightPoints(v3_1,v3_4)
+        addLine2( v3_1,res[0],res[1],v3_4)
+
+        //再比如
+        const v4_1 =  new THREE.Vector3( -10, 10,  0 )
+        const v4_2 =  new THREE.Vector3( 10, 10,  0 )
+        const res4 = ysThree.getSphereHeightPoints(v4_1,v4_2,4)
+        addLine2( v4_1,res4[0],res4[1],v4_2)
+
+
+
+
+
+        camera.position.set(20,20,20)
+        /*  ***********/
+        function initControls() {
+            const  controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.3;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 1000;
+            //是否开启右键拖拽
+            controls.enablePan = true
+            return controls
+        }
+        const  controls = initControls()
+        const clock= new THREE.Clock()
+        function animate() {
+            controls.update(clock.getDelta())
+            renderer.render(scene,camera)
+            requestAnimationFrame(animate)
+        }
+        animate()
+
+    })
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

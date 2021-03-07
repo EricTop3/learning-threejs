@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>材质</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="obj-labels"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+    <span class="ys-btn ys-btn-sm ys-btn-rao">相机绕点飞行</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">材质</div>
+    <div class="ys-block">
+        <table class="ys-table   ys-table-border">
+            <colgroup>
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>材质名称</th>
+                <td>描述</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>PointsMaterial</td>
+                <td>点材料，记得给点设置size大小。</td>
+            </tr>
+            <tr>
+                <td>LineBasicMaterial</td>
+                <td>基础线条材料 : 一种绘制线框式结构的材料。</td>
+            </tr>
+            <tr>
+                <td>LineDashedMaterial</td>
+                <td>虚线材料 : 一个用虚线绘制线框式结构的材料。</td>
+            </tr>
+            <tr>
+                <td>MeshBasicMaterial</td>
+                <td>基础材质，可以设置几何体颜色、透明度、纹理贴图等常见的外观属性，基础材质对场景中的光照没有颜色变化反应；</td>
+            </tr>
+            <tr>
+                <td>MeshLambertMaterial</td>
+                <td>兰伯特Lambert材质，除了支持基础材质的属性外，还支持漫反射光照模型， 可以设置反射率、折射率等物理光学参数，Lambert材质颜色明暗受光照强弱方向影响</td>
+            </tr>
+            <tr>
+                <td>MeshStandardMaterial</td>
+                <td>标准网孔材质，一种基于物理的标准材料，基于物理渲染现在已经成为3d技术的标准</td>
+            </tr>
+            <tr>
+                <td>MeshPhysicalMaterial</td>
+                <td>标准网孔材质的扩展，能更好的控制反色率</td>
+            </tr>
+            <tr>
+                <td>MeshPhongMaterial</td>
+                <td>Phong材质，支持镜面反射光照模型，给几何体添加局部高光效果</td>
+            </tr>
+            <tr>
+                <td>MeshDepthMaterial</td>
+                <td>深度材质，顾名思义颜色的计算受到顶点深度值的影响；这种材质的外观不是由光照或者某个材质决定，而是由物体到相机的远近距离决定，当物体离相机较近时会呈现白色，较远时会呈现黑色，所以可以使物体实现，渐变的效果</td>
+            </tr>
+            <tr>
+                <td>MeshNormalMaterial</td>
+                <td>法向量材质，Normal就是法线的意思，物体的表面不同的位置有不同的法线方向，从几何体对象的角度看， 几何体顶点相关数据一般都有顶点法向量数据，这些数据会被用于顶点的颜色计算。</td>
+            </tr>
+            <tr>
+                <td>MeshToonMaterial</td>
+                <td>卡通网络材质 -- 带有卡通阴影的MeshPhongMaterial的延伸</td>
+            </tr>
+            <tr>
+                <td>ShaderMaterial</td>
+                <td>用自定义着色器渲染的材料。</td>
+            </tr>
+            <tr>
+                <td>RawShaderMaterial</td>
+                <td>与ShaderMaterial类似 只是内置的uniforms and attributes的定义不会自动地预先写入GLSL着色器代码</td>
+            </tr>
+            <tr>
+                <td>ShadowMaterial</td>
+                <td>这种材料可以接收阴影，但在其他方面是完全透明的。</td>
+            </tr>
+            <tr>
+                <td>SpriteMaterial</td>
+                <td>精灵材质，与Sprite一起使用的材料。Sprite精灵 Sprite叫精灵，计算机图形学中，精灵指包含于场景中的二维图像或动画（wiki）。 在threejs中，这样说明Sprtite（doc） : A sprite is a plane that always faces towards the camera , generally with a partially transparent texture applied.Sprites do not cast shadows. 即Sprite是一个永远面向相机的平面，通常用来加载纹理，并且，sprite不接受阴影。</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="">
+            <img src="../../images/ysThree/material1.png"/>
+            <img src="../../images/ysThree/material2.png"/>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../plugins/jquery-1.10.2.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/dat.gui.min.js"></script>
+<script>
+    function init(callback) {
+        const container = $("#box"),
+            width = container.width(),
+            height = container.height()
+        //场景
+        const scene = new THREE.Scene();  // 场景
+        scene.fog = new THREE.Fog(0xaaaaaa, 0.010, 200);
+        //相机
+        const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+        camera.position.set(0,15,50)
+        camera.lookAt(scene.position);
+
+        //渲染器
+        const renderer = new THREE.WebGLRenderer({
+            antialias : true
+        });
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+        renderer.setClearColor('#000');
+
+        //坐标轴辅助
+        const axes = new THREE.AxesHelper(10); //红x 绿y 蓝z
+        scene.add(axes);
+
+        callback(scene,camera,renderer)
+
+    }
+    init((scene,camera,renderer)=> {
+        const X = -40
+        //平面
+        const geoFloor = new THREE.BoxBufferGeometry( 2000, 0.1, 2000 );
+        const matStdFloor = new THREE.MeshStandardMaterial( { color: 0x808080, roughness: 0, metalness: 0 } );
+        const mshStdFloor = new THREE.Mesh( geoFloor, matStdFloor );
+        mshStdFloor.position.set(0,-1,0)
+        mshStdFloor.receiveShadow = true;
+        scene.add( mshStdFloor );
+
+        /**
+         * 以下为当前版本所有部分材质
+         *
+         */
+        const addOne = (x,material) =>{
+            const geometry =  new THREE.SphereBufferGeometry( 4, 32, 32 );
+            const obj = new THREE.Mesh( geometry, material );
+            obj.position.set( x, 3, 0 );
+            obj.castShadow = true;
+            obj.receiveShadow = true;
+            scene.add(obj)
+            return obj
+        }
+
+        const objList = []
+        //基础材质
+        const material1 =new THREE.MeshBasicMaterial({color: 'yellow'});
+        objList.push({obj:addOne(X,material1),label:"基础材质"})
+
+        //兰伯特材质
+        const material2 =new THREE.MeshLambertMaterial({color: 'yellow'});
+        objList.push({obj:addOne(X + 8,material2),label:"兰伯特材质"})
+
+        //标准材质
+        const material3 = new THREE.MeshStandardMaterial( { color: 'yellow', roughness: 0.2, metalness: 0.2 } ); //标准材质
+        objList.push({obj:addOne(X + 2*8,material3),label:"标准材质"})
+
+        //深度材质
+        const material4 = new THREE.MeshDepthMaterial(); //无color
+        const box4Geo =  new THREE.BoxGeometry(1, 1, 40);
+        const box4 = new THREE.Mesh( box4Geo, material4 );
+        box4.position.set( -1.3, 13, 25 );
+        box4.castShadow = true;
+        box4.receiveShadow = true;//也让其接受阴影
+        scene.add( box4 );
+        objList.push({obj:box4,label:"深度材质"})
+
+        //法向量
+        const material5 = new THREE.MeshNormalMaterial({flatShading: true}); //无color
+        objList.push({obj:addOne(X + 3*8,material5),label:"法向量"})
+
+        //Phong材质
+        const material6 =  new THREE.MeshPhongMaterial({color: 'yellow'});
+        objList.push({obj:addOne(X + 5*8,material6),label:"Phong材质"})
+
+        //物理材质
+        const material7 =  new THREE.MeshPhysicalMaterial({color: 'yellow'})
+        objList.push({obj: addOne(X + 6*8,material7),label:"物理材质"})
+
+        //动画材质
+        const material8 =  new THREE.MeshToonMaterial({color: 'yellow'})
+        objList.push({obj: addOne(X + 7*8,material8),label:"动画材质"})
+
+        //自定义材质
+        /*
+        const material9 = new THREE.ShaderMaterial( {
+            uniforms: {
+                time: { value: 1.0 },
+                resolution: { value: new THREE.Vector2() }
+            },
+            vertexShader: document.getElementById( 'vertexShader' ).textContent,
+            fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+        });
+        */
+
+        //阴影材质
+        const material10 =  new THREE.ShadowMaterial();
+        material10.opacity = 1
+        objList.push({obj:addOne(X + 8*8,material10),label:"阴影材质"})
+
+        //精灵材质
+        const loader = new THREE.TextureLoader();
+        let sprite
+        loader.load('../../images/ysThree/ground.jpg',function (spriteMap) {
+            const spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
+            sprite = new THREE.Sprite( spriteMaterial );
+            sprite.scale.set(10, 10, 10)
+            sprite.position.set( X + 9*8, 3, 0 );
+            scene.add( sprite );
+            renderer.render(scene,camera)
+            addLabel(sprite,'精灵材质')
+        })
+
+        //多材质
+        const materials = [
+            new THREE.MeshBasicMaterial({color:0xff0000}),
+            new THREE.MeshBasicMaterial({color:0x0ff00}),
+            new THREE.MeshBasicMaterial({color:0x00ff00}),
+            new THREE.MeshBasicMaterial({color:0x000ff0}),
+            new THREE.MeshBasicMaterial({color:0x0000ff}),
+            new THREE.MeshBasicMaterial({color:0x000000})
+        ];
+        //const mesh = new THREE.Mesh(new THREE.BoxGeometry(5,5,5),new THREE.MultiMaterial(materials)) // MultiMaterial 已经被移出 用Array代替
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(5,5,5),materials) // MultiMaterial 已经被移出 用Array代替
+        mesh.position.set(0,5,25)
+        mesh.rotation.x = THREE.Math.degToRad(45);
+        addLabel(mesh,'多材质')
+        scene.add(mesh);
+
+        //平行光
+        const directionalLight = new THREE.DirectionalLight( '#fff', 0.8 )
+        directionalLight.position.set(10,25,-10)
+        directionalLight.castShadow = true
+        scene.add( directionalLight )
+        const  directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight )
+        directionalLight.shadow.camera.near = 2;
+        directionalLight.shadow.camera.far = 200;
+        directionalLight.shadow.camera.left = -50;
+        directionalLight.shadow.camera.right = 50;
+        directionalLight.shadow.camera.top = 50;
+        directionalLight.shadow.camera.bottom = -50;
+        directionalLight.shadow.mapSize.height = 1024;
+        directionalLight.shadow.mapSize.width = 1024
+        scene.add( directionalLightHelper )
+
+
+
+        function getObjectCilentCoordinates(object) {
+            //获取网格模型boxMesh的世界坐标
+            const worldVector = new THREE.Vector3(
+                object.position.x,
+                object.position.y,
+                object.position.z
+            );
+            const standardVector = worldVector.project(camera)//世界坐标转标准设备坐标
+                ,a = renderer.getSize(new THREE.Vector2()).width/2
+                ,b = renderer.getSize(new THREE.Vector2()).height/2
+                ,x = Math.round(standardVector.x * a + a)//标准设备坐标转屏幕坐标
+                ,y = Math.round(-standardVector.y * b + b)//标准设备坐标转屏幕坐标
+            return{x,y}
+        }
+        function addLabel (object,label){
+            const res = getObjectCilentCoordinates(object)
+            const  div = $(`#obj-label-${object.id}`)
+            if(div.length===0){
+                $(".obj-labels").append(`<div class='obj-label' id=${'obj-label-'+object.id}>${label}</div>`)
+            }
+            $(`#obj-label-${object.id}`).css({top:res.y-100, left:res.x-50})
+        }
+
+        renderer.shadowMap.enabled = true;
+        renderer.render(scene,camera);
+
+        objList.forEach(e =>{
+            addLabel(e.obj,e.label)
+        })
+
+        $(".ys-btn-rao").click(function () {
+            animate()
+        })
+        //绕点飞行
+        const O = [0,0],R = 80
+        let  a = 0,x  =  O[0] +  R   *   Math.cos(a),
+             z = O[1] +  R * Math.sin(a)
+        function animate() {
+            a = a + 0.01
+            x =  O[0] + R * Math.cos(a)
+            z =  O[1] + R * Math.sin(a)
+            camera.position.set(x,30,z)
+            camera.lookAt(new THREE.Vector3(0,0,0))
+
+            objList.forEach(e =>{
+                addLabel(e.obj,e.label)
+            })
+            addLabel(sprite)
+            addLabel(mesh)
+            requestAnimationFrame( animate )
+            renderer.render(scene, camera)
+        }
+
+    })
+
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>光效扫描</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">光效扫描</div>
+    <div class="ys-block"></div>
+</div>
+</body>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/createJs/tween.min.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/LoaderSupport.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/MTLLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/OBJLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/OBJLoader2.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+    const el = document.getElementById('box')
+
+    const app = new YsThree(el,{
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+    const camera = app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls()
+    const clock = new THREE.Clock()
+
+    //add light
+    const directionalLight = new THREE.DirectionalLight( '#fff' )
+    directionalLight.position.set( 30, 30, 30 ).normalize()
+    scene.add( directionalLight )
+    const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+    scene.add(ambientLight)
+    camera.position.set(500,500,500)
+    /*  **** **** ****   ****/
+
+    app.initStatus(Stats)
+    const uniform = {
+        u_color: { value: new THREE.Color("#5588aa") },
+        u_tcolor: { value: new THREE.Color("red") },
+        u_r: { value: 0.25 },
+        u_length: { value: 20 }, //扫过区域
+        u_max: { value: 300 } //扫过最大值
+    };
+    const Shader = {
+        vertexShader: `
+        varying vec3 vp;
+        void main(){
+           vp = position;
+           gl_Position	= projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+        fragmentShader: `
+        varying vec3 vp;
+        uniform vec3 u_color;
+        uniform vec3 u_tcolor;
+        uniform float u_r;
+        uniform float u_length;
+        uniform float u_max;
+        float getLeng(float x, float y){
+            return  sqrt((x-0.0)*(x-0.0)+(y-0.0)*(y-0.0));
+        }
+        void main(){
+            float uOpacity = 0.3;
+            vec3 vColor = u_color;
+            float uLength = getLeng(vp.x,vp.z);
+            if ( uLength <= u_r && uLength > u_r - u_length ) {
+                float op = sin( (u_r - uLength) / u_length ) + 0.1;
+                uOpacity = op;
+                if( vp.y<0.0){
+                    vColor = u_color * op;
+                }else{
+                    vColor = u_tcolor;
+                };
+            }
+
+             gl_FragColor = vec4(vColor,uOpacity);
+        }
+    `
+    }
+
+    const material = new THREE.ShaderMaterial({
+        vertexShader: Shader.vertexShader,
+        fragmentShader: Shader.fragmentShader,
+        side: THREE.DoubleSide,
+        uniforms: uniform,
+        transparent: true,
+        depthWrite: false,
+    });
+
+    new THREE.MTLLoader()
+        .setPath( '../../data/ysThree/models/obj/city/' )
+        .load( 'city.mtl', function ( materials ) {
+            materials.preload()
+            new THREE.OBJLoader()
+                .setPath( '../../data/ysThree/models/obj/city/' )
+                .setMaterials( materials )
+                .load( 'city.obj', function ( object ) {
+                    object.traverse(child =>{
+                        child.material = material
+                    })
+                    scene.add( object )
+                    $("#pro3").remove()
+                },onProgress)
+        })
+
+    const pro = ys.progress.render({
+        name :'#pro3',
+        type:'circle',
+        tips:'正在加载...0%',
+        barWidth:5,
+        percent:'0%'
+    })
+    function onProgress(xhr) {
+        if (xhr.lengthComputable) {
+            const  percentComplete =  parseInt(Math.round( (xhr.loaded / xhr.total) * 100, 2))+'%'
+            ys.progress.set(pro,{
+                percent:percentComplete,
+                tips:'正在加载...'+percentComplete
+            })
+        }
+    }
+    /*  **** **** ****   ****/
+    function render() {
+        controls.update(clock.getDelta())
+        renderer.render( scene,camera)
+        TWEEN.update()
+        app.staus.update()
+        requestAnimationFrame(render)
+        material.uniforms.u_r.value += clock.getDelta() * 100;
+        if (material.uniforms.u_r.value >= 300) {
+            material.uniforms.u_r.value = 20
+        }
+    }
+    render()
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>

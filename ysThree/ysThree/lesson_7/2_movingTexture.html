@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>移动材质</title>
+    <link rel="stylesheet" href="../../plugins/ys/ys.min.css">
+    <link rel="stylesheet" href="../../css/ysThree/pageStyle.css">
+</head>
+<body>
+<div class="ys-absolute-container" id="box" style="overflow: hidden"></div>
+<div class="fix-btns">
+    <span class="ys-btn ys-btn-warm ys-btn-sm  tips-btn">小记</span>
+</div>
+<div class="tips-container ys-absolute-container">
+    <div class="ys-tit">移动材质</div>
+    <div class="ys-block"></div>
+</div>
+</body>
+<script src="../../plugins/ys/ys.min.js"></script>
+<script src="../../plugins/threeLibrary/three.min.js"></script>
+<script src="../../plugins/threeLibrary/js/controls/OrbitControls.js"></script>
+<script src="../../plugins/createJs/tween.min.js"></script>
+<script src="../../plugins/threeLibrary/js/libs/stats.min.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/DRACOLoader.js"></script>
+<script src="../../plugins/threeLibrary/js/loaders/GLTFLoader.js"></script>
+<script src="../../plugins/ysThree/ysThree.js"></script>
+<script>
+    const el = document.getElementById('box')
+
+    const app = new YsThree(el,{
+        // gridHelper:true,//网格参考线
+        // axes:true,//坐标辅助
+        clearColor:'#000'//画布颜色
+    })
+    const camera = app.camera
+    const renderer = app.renderer
+    const scene = app.scene
+    const controls = app.initOrbitControls(THREE.OrbitControls)
+    const clock = new THREE.Clock()
+    renderer.setPixelRatio( window.devicePixelRatio )
+    renderer.shadowMap.enabled = true
+    //add light
+    const directionalLight = new THREE.DirectionalLight( '#fff' )
+    directionalLight.position.set( 3000, 3000, 3000 ).normalize()
+    scene.add( directionalLight )
+    const ambientLight = new THREE.AmbientLight('#fff',0.3) // obj 唯一 id
+    scene.add(ambientLight)
+
+    /*  **** **** ****   ****/
+    const box = new THREE.Mesh(new THREE.BoxBufferGeometry(5,5,5),new THREE.MeshBasicMaterial({color:'red'}))
+    scene.add(box)
+    const list =  [
+        [-20,5,-10],
+        [10,5,-9],
+        [10,5,20],
+        [40,5,40]
+    ]
+    //获取线 geo
+    const getLineGeo = list =>{
+        const l = []
+        for(let i =0;i<list.length;i++){
+            l.push( new THREE.Vector3(list[i][0],list[i][1],list[i][2]));
+        }
+        const curve = new THREE.CatmullRomCurve3(l) //曲线路径
+        const points = curve.getPoints(50) //曲线分五十段，也就是取 101个点
+
+        const geometry = new THREE.Geometry()//创建一个几何 存储这些定点
+        for(let i =0;i < points.length;i++){
+            geometry.vertices.push( new THREE.Vector3(points[i].x,points[i].y,points[i].z))
+        }
+
+        return {
+            curve,
+            geometry,
+            points
+        }
+    }
+
+    const res  =  getLineGeo(list)
+
+    //管道体
+    const tubeGeometry = new THREE.TubeGeometry(res.curve, 101, 0.1, 30)
+    const texture = new THREE.TextureLoader().load("../../images/ysThree/red_line.png")
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping; //每个都重复
+    texture.repeat.set(1, 1);
+    const tubeMesh = new THREE.Mesh(tubeGeometry , new THREE.MeshBasicMaterial({map:texture,side:THREE.BackSide,transparent:true}))
+    texture.needsUpdate = true
+    scene.add(tubeMesh)
+
+    // obj
+    /*  **** **** ****   ****/
+    function render() {
+        controls.update(clock.getDelta())
+        renderer.render( scene,camera)
+        requestAnimationFrame(render)
+        texture.offset.x -= 0.01
+    }
+    render()
+</script>
+<!--此脚本与案例无关 可忽略-->
+<script src="../../js/ysThree/pageJs.js"></script>
+</html>
